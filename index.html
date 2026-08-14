@@ -982,9 +982,35 @@ function netErr(e){
   return "인터넷에 연결하지 못했어요. 연결 상태를 확인해 주세요. ("+e.message+")";
 }
 const model=()=>localStorage.getItem("mh_tm")||"gemini-3.5-flash";
+/* proxyMode : null=아직 모름, true=서버가 키 보관(참가자 입력 불필요), false=내 키 사용 */
+let proxyMode=null;
+async function probeProxy(){
+  if(!/^https?:/.test(location.protocol)){ proxyMode=false; return false; }
+  try{
+    const r=await fetch("/api/gemini",{method:"GET"});
+    if(r.ok){ const j=await r.json(); proxyMode=!!(j&&j.proxy); }
+    else proxyMode=false;
+  }catch(e){ proxyMode=false; }
+  return proxyMode;
+}
 async function callGemini(parts,sys){
   const input=parts.map(p=>p.type==="text"?{type:"text",text:p.text}:{type:"image",mime_type:p.mime,data:p.data});
   const body={model:model(),input}; if(sys) body.system_instruction=sys;
+
+  /* ① 서버 프록시가 있으면 그쪽으로 (키를 브라우저에 두지 않음) */
+  if(proxyMode===null) await probeProxy();
+  if(proxyMode){
+    let r,j;
+    try{
+      r=await fetch("/api/gemini",{method:"POST",
+        headers:{"Content-Type":"application/json"},body:JSON.stringify(body)});
+      j=await r.json();
+    }catch(e){ throw new Error(netErr(e)); }
+    if(!r.ok) throw new Error((j&&j.error)||("서버 오류 "+r.status));
+    return extract(j);
+  }
+
+  /* ② 프록시가 없으면 내 키로 직접 호출 */
   let res,json;
   try{ res=await fetch(ENDPOINT,{method:"POST",headers:{"Content-Type":"application/json","x-goog-api-key":key()},body:JSON.stringify(body)});
        json=await res.json(); }catch(e){ throw new Error(netErr(e)); }
@@ -1006,7 +1032,11 @@ function extract(json){ const t=[];
     for(const k in n){ if(/usage/i.test(k))continue; walk(n[k],isT);} })(json,false);
   return {text:t.join("\n").trim()};
 }
-function needKey(id){ if(!key()){$(id).textContent="먼저 [⚙️ 교사 설정]에서 API 키를 넣어 주세요.";openSettings();return true;} return false; }
+function needKey(id){
+  if(proxyMode) return false;
+  if(!key()){$(id).textContent="먼저 [⚙️ 교사 설정]에서 API 키를 넣어 주세요.";openSettings();return true;}
+  return false;
+}
 
 /* =========================================================
    4. 손글씨
@@ -1553,6 +1583,10 @@ function validKey(k){
 }
 function showKeySource(){
   const el=$("keyFrom"); if(!el) return;
+  if(proxyMode){
+    el.textContent="✓ 서버에 키가 안전하게 보관되어 있습니다. 참가자는 키를 입력하지 않아도 됩니다.";
+    return;
+  }
   if(!key()){ el.textContent=""; return; }
   el.textContent = window.__keyFromFile
     ? "✓ config.local.js 에서 키를 자동으로 불러왔습니다. 다시 입력하지 않아도 됩니다."
@@ -1561,6 +1595,7 @@ function showKeySource(){
 (function(){
   const done=()=>{
     showKeySource();
+    if(proxyMode) return;   // 서버에 키가 있으면 설정창을 띄우지 않습니다
     if(location.protocol==="file:"){
       const d=document.createElement("div"); d.className="filebar";
       d.innerHTML='<span style="font-size:22px">📂</span><span class="t"><b>파일 열기 모드로 실행 중입니다.</b><br>'+
@@ -1571,6 +1606,7 @@ function showKeySource(){
     }
     if(!key()) setTimeout(openSettings,500);
   };
+  probeProxy().then(()=>{
   const s=document.createElement("script"); s.src="config.local.js";
   s.onload=()=>{
     if(validKey(window.MH_API_KEY)){
@@ -1582,6 +1618,7 @@ function showKeySource(){
   };
   s.onerror=done;
   document.head.appendChild(s);
+  });
 })();
 </script>
 </body>
