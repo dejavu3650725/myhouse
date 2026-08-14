@@ -62,6 +62,11 @@ textarea{resize:vertical;min-height:82px;line-height:1.65}
 .actions{display:flex;gap:11px;flex-wrap:wrap;margin-top:20px;align-items:center}
 .status{font-size:14px;color:var(--sub);font-weight:700}
 .small{font-size:13px;color:var(--sub)}
+.stdbox{border:var(--bd);border-radius:14px;background:var(--peri-l);padding:12px 15px;
+  margin:0 0 16px;font-size:14px;box-shadow:3px 3px 0 0 var(--ink);display:flex;gap:10px;align-items:flex-start}
+.stdbox .c{background:var(--ink);color:#fff;border-radius:8px;padding:2px 9px;font-weight:900;
+  font-size:12.5px;flex:none;white-space:nowrap}
+.stdbox .x{font-weight:700;line-height:1.5}
 .pill{display:inline-block;font-size:13.5px;background:var(--yellow);color:var(--ink);
   padding:4px 13px;border-radius:99px;font-weight:800;border:2px solid var(--ink)}
 
@@ -255,6 +260,7 @@ footer{text-align:center;color:var(--sub);font-size:13px;padding:30px 18px 46px}
 <!-- 0 -->
 <section class="card" id="s0">
   <h2>오늘의 미션 🏡</h2>
+  <div class="stdbox"><span class="c" id="stdCode"></span><span class="x" id="stdFull"></span></div>
   <p class="lead">종이에 <b>손글씨로 명령</b>을 쓰면 AI가 그대로 <b>3D 방</b>을 지어 줍니다.
     그 방이 정말 내 말대로인지 <b>탐정처럼 따져 보고</b>, 내 손으로 가구를 옮겨 완성해요.</p>
 
@@ -1671,6 +1677,8 @@ loadSettings();
 try{const st=JSON.parse(localStorage.getItem("mh_state")||"{}");
   if(st.team)$("teamName").value=st.team; if(st.house)$("houseName").value=st.house;}catch(e){}
 $("hdrStd").textContent = STD_LINE;
+$("stdCode").textContent = STD_CODE;
+$("stdFull").textContent = STD_FULL + ".";
 $("ftStd").textContent = STD_LINE + " 수업 도구";
 renderSteps(); sfInit(); sfPreview();
 
