@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>전시회 갤러리 · 프롬프트로 마이 하우스 제작</title>
+<style>
+:root{--cream:#f3eee4;--paper:#fff;--ink:#14110f;--sub:#6f675e;--peri:#a3b0f5;--yellow:#ffd24a;--bd:2.5px solid var(--ink)}
+*{box-sizing:border-box}
+body{margin:0;background:var(--cream);color:var(--ink);
+  font-family:"Pretendard","Apple SD Gothic Neo","Malgun Gothic",system-ui,sans-serif;line-height:1.6}
+header{background:var(--cream);border-bottom:3px solid var(--ink);padding:14px 20px;
+  display:flex;align-items:center;gap:13px;flex-wrap:wrap;position:sticky;top:0;z-index:10}
+.logo{width:44px;height:44px;border-radius:14px;background:var(--peri);border:var(--bd);
+  display:grid;place-items:center;font-size:22px;box-shadow:3px 3px 0 0 var(--ink)}
+h1{font-size:21px;margin:0;font-weight:900;letter-spacing:-.7px}
+h1 small{display:block;font-size:11.5px;font-weight:700;color:var(--sub)}
+.sp{flex:1}
+button,a.btn{font:inherit;font-size:14px;font-weight:800;cursor:pointer;border:var(--bd);
+  border-radius:99px;padding:9px 17px;background:#fff;color:var(--ink);
+  box-shadow:3px 3px 0 0 var(--ink);text-decoration:none;display:inline-block}
+button:hover,a.btn:hover{transform:translate(-1px,-1px);box-shadow:4px 4px 0 0 var(--ink)}
+.wrap{max-width:1180px;margin:0 auto;padding:22px 18px 60px}
+.bar{display:flex;gap:12px;align-items:center;flex-wrap:wrap;margin-bottom:18px}
+.cnt{background:var(--yellow);border:var(--bd);border-radius:99px;padding:7px 16px;font-weight:900;font-size:14.5px}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(240px,1fr));gap:16px}
+.card{background:var(--paper);border:var(--bd);border-radius:18px;overflow:hidden;
+  box-shadow:5px 5px 0 0 var(--ink);transition:transform .12s}
+.card:hover{transform:translate(-2px,-2px);box-shadow:7px 7px 0 0 var(--ink)}
+.card img{width:100%;display:block;border-bottom:var(--bd);background:#eee}
+.card .m{padding:10px 13px;font-size:13px}
+.card .m b{display:block;font-size:14.5px;font-weight:900}
+.card .m span{color:var(--sub);font-size:12px}
+.msg{background:#fff;border:var(--bd);border-radius:18px;padding:26px;box-shadow:5px 5px 0 0 var(--ink);text-align:center}
+.msg h2{margin:0 0 10px;font-size:20px}
+.msg code{background:#eef1fa;border:1.5px solid var(--ink);border-radius:6px;padding:1px 7px;font-size:12.5px}
+#lb{position:fixed;inset:0;background:rgba(20,17,15,.82);display:none;align-items:center;
+  justify-content:center;padding:20px;z-index:50;cursor:zoom-out}
+#lb img{max-width:96%;max-height:92vh;border:3px solid #fff;border-radius:14px}
+</style>
+</head>
+<body>
+<header>
+  <div class="logo">🖼️</div>
+  <h1>전시회 갤러리<small>프롬프트로 마이 하우스 제작 · 참가자 작품</small></h1>
+  <span class="sp"></span>
+  <button onclick="load()">🔄 새로고침</button>
+  <a class="btn" href="/">← 체험하러 가기</a>
+</header>
+
+<div class="wrap">
+  <div class="bar"><span class="cnt" id="cnt">불러오는 중…</span></div>
+  <div id="out"></div>
+</div>
+
+<div id="lb" onclick="this.style.display='none'"><img id="lbimg" alt="크게 보기"></div>
+
+<script>
+const $ = id => document.getElementById(id);
+const esc = s => String(s||"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+
+function parseName(n){
+  // 2026-08-14T12-30-00__모둠__방이름.png
+  const base = n.replace(/\.png$/i,"");
+  const p = base.split("__");
+  const when = (p[0]||"").replace("T"," ").replace(/-/g,(m,i)=>i>9?":":"-").slice(0,16);
+  return { when, team: p[1]||"익명", house: p[2]||"" };
+}
+function big(u){ $("lbimg").src=u; $("lb").style.display="flex"; }
+
+async function load(){
+  $("cnt").textContent = "불러오는 중…";
+  $("out").innerHTML = "";
+  try{
+    const r = await fetch("/api/gallery");
+    const j = await r.json();
+    if(j.gallery === false){
+      $("cnt").textContent = "갤러리 꺼짐";
+      $("out").innerHTML = `<div class="msg"><h2>갤러리가 아직 켜지지 않았습니다</h2>
+        <p>Vercel 프로젝트 → <b>Storage</b> → <b>Blob</b> 저장소를 만들어 이 프로젝트에 연결해 주세요.<br>
+        연결하면 <code>BLOB_READ_WRITE_TOKEN</code> 이 자동으로 등록되고, 재배포 후 바로 동작합니다.</p></div>`;
+      return;
+    }
+    const items = j.items || [];
+    $("cnt").textContent = `작품 ${items.length}개`;
+    if(!items.length){
+      $("out").innerHTML = `<div class="msg"><h2>아직 저장된 작품이 없어요</h2>
+        <p>참가자가 5단계에서 <b>[🖼️ 기념 카드 저장]</b>을 누르면 여기에 모입니다.</p></div>`;
+      return;
+    }
+    $("out").innerHTML = `<div class="grid">` + items.map(it=>{
+      const m = parseName(it.name);
+      return `<div class="card" onclick="big('${it.url}')">
+        <img src="${it.url}" loading="lazy" alt="${esc(m.team)}의 방">
+        <div class="m"><b>${esc(m.team)}</b>
+          <span>${esc(m.house)}${m.house?" · ":""}${esc(m.when)}</span></div></div>`;
+    }).join("") + `</div>`;
+  }catch(e){
+    $("cnt").textContent = "오류";
+    $("out").innerHTML = `<div class="msg"><h2>목록을 불러오지 못했습니다</h2><p>${esc(e.message)}</p></div>`;
+  }
+}
+load();
+</script>
+</body>
+</html>

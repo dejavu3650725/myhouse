@@ -26,10 +26,14 @@ const FALLBACK_ORDER = [
   "gemini-2.5-flash-lite",
 ];
 
-// IP별 호출 제한 (10분에 40번)
+/* 호출 제한
+   전시회에서는 참가자 폰이 모두 같은 와이파이(=같은 IP)로 묶이므로
+   IP 제한을 넉넉히 두고, 대신 전체 총량으로 사용량을 보호합니다. */
 const WINDOW_MS = 10 * 60 * 1000;
-const MAX_HITS = 40;
+const MAX_PER_IP = 250;    // 한 IP가 10분에 250번 (부스 전체가 써도 충분)
+const MAX_TOTAL = 900;     // 서버 전체가 10분에 900번 (폭주 방지)
 const hits = new Map();
+let globalHits = [];
 
 const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
 const safeParse = (t) => {
@@ -42,11 +46,15 @@ const safeParse = (t) => {
 
 function rateLimited(ip) {
   const now = Date.now();
+  globalHits = globalHits.filter((t) => now - t < WINDOW_MS);
+  globalHits.push(now);
+  if (globalHits.length > MAX_TOTAL) return "total";
+
   const arr = (hits.get(ip) || []).filter((t) => now - t < WINDOW_MS);
   arr.push(now);
   hits.set(ip, arr);
   if (hits.size > 5000) hits.clear();
-  return arr.length > MAX_HITS;
+  return arr.length > MAX_PER_IP ? "ip" : false;
 }
 
 /** 잠깐 붐비는 것이라 다시 시도하면 될 오류인가? */
@@ -118,10 +126,14 @@ export default async function handler(req, res) {
     (req.headers["x-forwarded-for"] || "").split(",")[0].trim() ||
     req.socket?.remoteAddress ||
     "unknown";
-  if (rateLimited(ip))
-    return res
-      .status(429)
-      .json({ error: "잠시 후 다시 시도해 주세요. 짧은 시간에 요청이 너무 많았습니다." });
+  const limited = rateLimited(ip);
+  if (limited)
+    return res.status(429).json({
+      error:
+        limited === "total"
+          ? "지금 이용하는 사람이 아주 많아요. 1~2분 뒤에 다시 눌러 주세요."
+          : "잠시 후 다시 시도해 주세요. 짧은 시간에 요청이 너무 많았습니다.",
+    });
 
   const body = typeof req.body === "string" ? safeParse(req.body) : req.body || {};
   if (!Array.isArray(body.input) || body.input.length === 0)

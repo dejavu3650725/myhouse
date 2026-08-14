@@ -1,0 +1,8 @@
+{
+  "name": "myhouse-prompt",
+  "private": true,
+  "type": "module",
+  "dependencies": {
+    "@vercel/blob": "latest"
+  }
+}

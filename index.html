@@ -87,6 +87,11 @@ textarea{resize:vertical;min-height:82px;line-height:1.65}
 .chk .t b{display:block;font-size:15.5px}
 .chk .t small{color:var(--sub);font-size:13.4px}
 .q{margin-bottom:16px}
+.chips{display:flex;gap:7px;flex-wrap:wrap;margin:0 0 8px}
+.chip{font-size:13px;padding:6px 13px;border:2px solid var(--ink);border-radius:99px;
+  background:#fff;font-weight:700;box-shadow:2px 2px 0 0 var(--ink);cursor:pointer}
+.chip:hover{background:var(--yellow)}
+.chip.used{background:var(--peri)}
 
 /* ---------- 3D 무대 ---------- */
 #stage{border-radius:var(--r);overflow:hidden;border:var(--bd);background:var(--cream2);box-shadow:6px 6px 0 0 var(--ink)}
@@ -237,7 +242,7 @@ footer{text-align:center;color:var(--sub);font-size:13px;padding:30px 18px 46px}
 
 <header>
   <div class="logo">🏠</div>
-  <h1>프롬프트로 마이 하우스 제작<small>초등 실과 [6실05-02] · 컴퓨터에게 명령하는 방법 체험하기</small></h1>
+  <h1>프롬프트로 마이 하우스 제작<small id="hdrStd"></small></h1>
   <span class="spacer"></span>
   <button class="btn-sm btn-2" onclick="openQR()">📱 내 폰으로 열기</button>
   <button class="btn-sm btn-3" onclick="openSettings()">⚙️ 교사 설정</button>
@@ -272,10 +277,13 @@ footer{text-align:center;color:var(--sub);font-size:13px;padding:30px 18px 46px}
   </div>
 
   <div class="actions">
-    <button class="btn" onclick="goStep(1)">시작하기 →</button>
-    <button class="btn-2 btn-sm" onclick="demoRoom()">👀 먼저 3D 방 구경하기</button>
+    <button class="btn" onclick="startFlow(true)">🚀 빠른 체험 <span class="small" style="color:#cfd6ff">(약 3분)</span></button>
+    <button class="btn-2" onclick="startFlow(false)">📚 전체 과정 <span class="small">(수업용)</span></button>
+    <button class="btn-3 btn-sm" onclick="demoRoom()">👀 3D 방 구경</button>
     <span class="status" id="s0status"></span>
   </div>
+  <p class="small" style="margin:10px 0 0">빠른 체험은 <b>손글씨 → AI가 짓기 → 내 손으로 완성</b>만 합니다.
+    전체 과정은 <b>따져보기·명령 도우미</b>까지 포함해 수업용으로 진행합니다.</p>
 </section>
 
 <!-- 1 -->
@@ -336,7 +344,7 @@ footer{text-align:center;color:var(--sub);font-size:13px;padding:30px 18px 46px}
   <div id="host2" style="margin-top:18px"></div>
   <div id="plan2"></div>
   <div class="actions" id="s2next" style="display:none">
-    <button class="btn" onclick="goStep(3)">방을 따져 보러 가기 →</button>
+    <button class="btn" id="s2nextBtn" onclick="goStep(S.fast?5:3)">방을 따져 보러 가기 →</button>
   </div>
 </section>
 
@@ -357,11 +365,15 @@ footer{text-align:center;color:var(--sub);font-size:13px;padding:30px 18px 46px}
   <div id="auditOut"></div>
 
   <h3>② 탐정 노트</h3>
+  <p class="small" style="margin:-4px 0 12px">아래 <b>버튼을 눌러 고르면</b> 문장이 채워집니다. 직접 써도 좋아요.</p>
   <div class="q"><label>🔍 빠졌거나 이상한 점은 무엇인가요?</label>
+    <div class="chips" id="chip1"></div>
     <textarea id="q1" placeholder="예) 게임기를 놔 달라고 했는데 없어요 / 침대가 문을 막고 있어요"></textarea></div>
   <div class="q"><label>🤔 AI는 왜 이렇게 놓았을까요? 그 이유에 동의하나요?</label>
+    <div class="chips" id="chip2"></div>
     <textarea id="q2" placeholder="예) 창문 옆이 밝아서 책상을 놓았다는데, 나는 햇빛이 눈부실 것 같아 반대다"></textarea></div>
   <div class="q"><label>⚖️ 모두가 쓰기 편한 방인가요? <span class="small">(지나갈 길, 넘어질 물건 등)</span></label>
+    <div class="chips" id="chip3"></div>
     <textarea id="q3" placeholder="예) 가구 사이가 좁아 지나다니기 힘들 것 같다"></textarea></div>
   <div class="q"><label>🎯 내 명령과 결과가 얼마나 같나요?</label>
     <div class="grade" id="matchGrade">
@@ -467,8 +479,9 @@ footer{text-align:center;color:var(--sub);font-size:13px;padding:30px 18px 46px}
 
   <div class="actions">
     <button class="btn" onclick="saveCard()">🖼️ 기념 카드 저장 (이미지)</button>
+    <button class="btn-2 btn-sm hidden" id="shareBtn" onclick="shareCard()">📤 폰으로 공유</button>
     <button class="btn-3 btn-sm" onclick="buildReport()">🖨️ 보고서 인쇄</button>
-    <button class="btn-3 btn-sm" onclick="goStep(4)">← 뒤로</button>
+    <button class="btn-3 btn-sm" onclick="goStep(S.fast?2:4)">← 뒤로</button>
     <span class="status" id="cardStatus"></span>
   </div>
   <p class="small">기념 카드는 오늘 활동을 한 장의 <b>PNG 그림</b>으로 만들어 줍니다. 폰으로 열었다면 사진첩에 저장돼요.</p>
@@ -558,7 +571,7 @@ footer{text-align:center;color:var(--sub);font-size:13px;padding:30px 18px 46px}
   </div>
 </div>
 
-<footer>프롬프트로 마이 하우스 제작 · 초등 실과 [6실05-02] 수업 도구<br>
+<footer>프롬프트로 마이 하우스 제작 · <span id="ftStd"></span><br>
 API 키와 활동 기록은 이 컴퓨터(브라우저)에만 저장됩니다.</footer>
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
@@ -567,9 +580,20 @@ API 키와 활동 기록은 이 컴퓨터(브라우저)에만 저장됩니다.</
 /* =========================================================
    0. 상태 · 유틸
 ========================================================= */
-const S={step:0,img1:null,img2:null,prompt1:"",hwGrade:"",match:"",
+const S={step:0,fast:false,img1:null,img2:null,prompt1:"",hwGrade:"",match:"",
   plan1:null,plan2:null,shot1:null,shot2:null,shot3:null,checks:{},built5:false};
+/* ══════════════════════════════════════════════════════════════
+   성취기준 문구 — 여기 세 줄만 고치면 헤더·푸터·보고서·기념카드에
+   모두 반영됩니다.
+   ══════════════════════════════════════════════════════════════ */
+const STD_CODE = "[6실05-02]";
+const STD_FULL = "컴퓨터에게 명령하는 방법을 체험하고, 주어진 문제를 해결하는 프로그램을 작성한다";
+const STD_LINE = "초등 실과 " + STD_CODE + " · 컴퓨터에게 명령하는 방법 체험하기";
+
 const STEP_NAMES=["미션","①손글씨","②AI가 짓기","③따져보기","④명령 도우미","⑤완성"];
+const FLOW_FULL=[0,1,2,3,4,5], FLOW_FAST=[0,1,2,5];
+const flow=()=>S.fast?FLOW_FAST:FLOW_FULL;
+function startFlow(fast){ S.fast=!!fast; renderSteps(); goStep(1); }
 const $=id=>document.getElementById(id);
 const esc=s=>(s||"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
 const clamp=(v,a,b)=>Math.max(a,Math.min(b,v));
@@ -1309,6 +1333,29 @@ const CHECKS=[
   ["place","🚪 자리가 알맞나?","문·창문을 막지 않는지, 지나다닐 길이 있는지"],
   ["use","🤝 그대로 써도 될까?","AI가 만들었다고 밝혔는지, 내가 고칠 곳은 어디인지"]
 ];
+const QCHIPS={
+  chip1:["시킨 가구가 빠졌어요","시키지 않은 게 들어왔어요","색이 달라요","크기가 이상해요",
+         "문을 막고 있어요","창문을 가렸어요","가구가 겹쳐 있어요","다 잘 됐어요"],
+  chip2:["밝은 곳에 두려고 그런 것 같아요","넓게 쓰려고 그런 것 같아요","벽에 붙이려고 그런 것 같아요",
+         "이유에 동의해요","이유에 동의하지 않아요","왜 그랬는지 모르겠어요"],
+  chip3:["지나다닐 길이 좁아요","넘어질 것 같은 물건이 있어요","휠체어가 못 지나가요",
+         "문 앞이 막혀 있어요","괜찮아요, 편해 보여요"]
+};
+function renderChips(){
+  Object.keys(QCHIPS).forEach(id=>{
+    const box=$(id); if(!box) return;
+    box.innerHTML=QCHIPS[id].map((t,i)=>
+      `<button class="chip" onclick="addChip('${id}',${i},this)">${t}</button>`).join("");
+  });
+}
+function addChip(id,i,btn){
+  const ta=$(id.replace("chip","q")), t=QCHIPS[id][i];
+  const cur=ta.value.trim();
+  if(cur.includes(t)) return;
+  ta.value = cur ? cur.replace(/[.\s]*$/,"") + ". " + t : t;
+  btn.classList.add("used");
+  ta.focus();
+}
 function renderChecks(){ $("checkBox").innerHTML=CHECKS.map(([k,t,d])=>
   `<label class="chk"><input type="checkbox" ${S.checks[k]?"checked":""} onchange="S.checks['${k}']=this.checked">
    <span class="t"><b>${t}</b><small>${d}</small></span></label>`).join(""); }
@@ -1410,15 +1457,22 @@ function copySentence(){ const t=sfSentence(); if(!t)return;
 /* =========================================================
    9. 단계 이동 · 저장
 ========================================================= */
-function renderSteps(){ $("stepbar").innerHTML=STEP_NAMES.map((n,i)=>
-  `<div class="${i===S.step?'on':(i<S.step?'done':'')}">${n}</div>`).join(""); }
+function renderSteps(){
+  const f=flow(), cur=f.indexOf(S.step);
+  $("stepbar").innerHTML=f.map((idx,pos)=>{
+    let nm=STEP_NAMES[idx];
+    if(S.fast) nm=["미션","①손글씨","②AI가 짓기","③완성"][pos];
+    return `<div class="${idx===S.step?'on':(pos<cur?'done':'')}">${nm}</div>`;
+  }).join("");
+}
 function goStep(n){
-  if(n===2) $("promptEcho").textContent=P1()||"(비어 있음)";
+  if(n===2){ $("promptEcho").textContent=P1()||"(비어 있음)";
+    const b=$("s2nextBtn"); if(b) b.textContent=S.fast?"내 손으로 완성하러 가기 →":"방을 따져 보러 가기 →"; }
   if(n===4){ if(!$("prompt2").value) $("prompt2").value=P1(); sfInit(); sfPreview(); }
   S.step=n;
   for(let i=0;i<=5;i++) $("s"+i).classList.toggle("hidden",i!==n);
   if(n===2&&S.plan1){mountStage("host2");buildFromPlan(S.plan1);}
-  if(n===3){renderChecks();renderWhy(); if(S.plan1){mountStage("host3");buildFromPlan(S.plan1);}}
+  if(n===3){renderChecks();renderChips();renderWhy(); if(S.plan1){mountStage("host3");buildFromPlan(S.plan1);}}
   if(n===4&&S.plan2){mountStage("host4");buildFromPlan(S.plan2);}
   if(n===5){mountStage("host5");
     if(!S.built5&&(S.plan2||S.plan1)){buildFromPlan(S.plan2||S.plan1);S.built5=true;}
@@ -1465,7 +1519,8 @@ function buildReport(){
   $("reportArea").className="card";
   $("reportArea").innerHTML=`
     <h2>🏠 프롬프트로 마이 하우스 제작 — 활동 보고서</h2>
-    <p class="small">${esc(a.team)} · 「${esc(a.house)}」 · ${a.date} · 실과 [6실05-02]</p>
+    <p class="small">${esc(a.team)} · 「${esc(a.house)}」 · ${a.date}</p>
+    <p class="small" style="margin-top:-8px">성취기준 ${esc(STD_CODE)} ${esc(STD_FULL)}</p>
     <h3>1. 손글씨로 내린 첫 명령</h3><p>${esc(a.prompt1)}</p>
     <p class="small">AI가 내 글씨를 읽은 정도: <b>${esc(a.hwGrade)}</b></p>
     <h3>2. AI가 만든 방</h3><p class="small">1차 가구: ${esc(a.furniture1)}</p>
@@ -1569,13 +1624,44 @@ async function saveCard(){
 
   g.fillStyle="#8a8279"; g.font=F(20,600); g.textAlign="center";
   g.fillText("처음 배치는 AI가, 완성은 내가 했습니다.",534,1518);
-  g.fillText("초등 실과 [6실05-02] · 컴퓨터에게 명령하는 방법 체험하기",534,1552);
+  g.fillText(STD_LINE,534,1552);
 
   const url=cv.toDataURL("image/png");
+  lastCard={url, name:`마이하우스_${a.team}_${a.date}.png`};
   $("cardPrev").innerHTML=`<img src="${url}" alt="기념 카드">`;
   const l=document.createElement("a");
-  l.href=url; l.download=`마이하우스_${a.team}_${a.date}.png`; l.click();
-  $("cardStatus").textContent="기념 카드를 저장했어요 ✓ (폰이면 그림을 꾹 눌러 저장하세요)";
+  l.href=url; l.download=lastCard.name; l.click();
+  if(navigator.canShare) $("shareBtn").classList.remove("hidden");
+  $("cardStatus").textContent="기념 카드를 저장했어요 ✓";
+  uploadCard(url,a);
+}
+
+/* ---------- 전시회 갤러리로 보내기 ---------- */
+let lastCard=null;
+async function uploadCard(dataUrl,a){
+  if(!/^https?:/.test(location.protocol)) return;
+  try{
+    const r=await fetch("/api/gallery",{method:"POST",
+      headers:{"Content-Type":"application/json"},
+      body:JSON.stringify({image:dataUrl,team:a.team,house:a.house})});
+    const j=await r.json();
+    if(j&&j.ok){
+      $("cardStatus").innerHTML="기념 카드를 저장하고 <b>전시회 갤러리에도 올렸어요</b> ✓ "+
+        `<a href="/gallery.html" target="_blank" rel="noopener">갤러리 보기</a>`;
+    }
+  }catch(e){ /* 갤러리가 꺼져 있어도 앱은 그대로 동작 */ }
+}
+async function shareCard(){
+  if(!lastCard) return;
+  try{
+    const blob=await (await fetch(lastCard.url)).blob();
+    const file=new File([blob],lastCard.name,{type:"image/png"});
+    if(navigator.canShare && navigator.canShare({files:[file]})){
+      await navigator.share({files:[file],title:"프롬프트로 마이 하우스 제작"});
+    }else{
+      $("cardStatus").textContent="이 기기는 공유 기능을 지원하지 않아요. 그림을 꾹 눌러 저장하세요.";
+    }
+  }catch(e){ /* 사용자가 공유를 취소한 경우 */ }
 }
 function resetAll(){if(!confirm("모든 활동 내용을 지우고 처음부터 시작할까요? (API 키는 유지됩니다)"))return;
   localStorage.removeItem("mh_state");location.reload();}
@@ -1584,6 +1670,8 @@ function resetAll(){if(!confirm("모든 활동 내용을 지우고 처음부터 
 loadSettings();
 try{const st=JSON.parse(localStorage.getItem("mh_state")||"{}");
   if(st.team)$("teamName").value=st.team; if(st.house)$("houseName").value=st.house;}catch(e){}
+$("hdrStd").textContent = STD_LINE;
+$("ftStd").textContent = STD_LINE + " 수업 도구";
 renderSteps(); sfInit(); sfPreview();
 
 /* ── 로컬 자동 실행 ─────────────────────────────────────────────
