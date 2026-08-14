@@ -1074,7 +1074,7 @@ function drawQR(){
   const isLocal=/^https?:\/\/(localhost|127\.0\.0\.1)/i.test(url);
   $("qrWarn").innerHTML = isFile
     ? `<div class="warnbox" style="text-align:left"><b>이 주소는 폰에서 열 수 없어요.</b><br>
-       깃허브에 올렸다면 위 칸에 <code class="k">https://dejavu3650725.github.io/myhouse/</code> 를 넣어 주세요.<br>
+       배포한 주소(예: <code class="k">https://myhouse.vercel.app</code>)를 위 칸에 넣어 주세요.<br>
        <span class="small">또는 폴더의 <b>실행하기.bat</b>을 켜고, 검은 창에 적힌 <code class="k">http://192.168.○.○:8000</code> 주소를 넣어도 됩니다.</span></div>`
     : isLocal
     ? `<div class="tip" style="text-align:left"><b>지금은 이 PC에서만 열리는 주소예요.</b><br>
