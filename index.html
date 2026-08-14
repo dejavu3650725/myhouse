@@ -975,6 +975,18 @@ function mountStage(hostId){
 const ENDPOINT="https://generativelanguage.googleapis.com/v1beta/interactions";
 const LEGACY=m=>`https://generativelanguage.googleapis.com/v1beta/models/${m}:generateContent`;
 const key=()=>(localStorage.getItem("mh_key")||"").trim();
+function friendlyErr(m){
+  m=String(m||"");
+  if(/high demand|overloaded|unavailable|try again later|rate limit|RESOURCE_EXHAUSTED|503/i.test(m))
+    return "지금 AI가 많이 붐빕니다. 20초쯤 뒤에 버튼을 한 번 더 눌러 주세요.";
+  if(/API_KEY_INVALID|API key not valid|invalid api key|PERMISSION_DENIED/i.test(m))
+    return "API 키가 올바르지 않습니다. [⚙️ 교사 설정]에서 키를 다시 확인해 주세요.";
+  if(/quota|billing|exceeded/i.test(m))
+    return "오늘 쓸 수 있는 양을 다 썼어요. 잠시 뒤에 다시 시도해 주세요.";
+  if(/SAFETY|blocked|safety/i.test(m))
+    return "이 명령은 만들 수 없어요. 초등학교 수업에 알맞은 내용으로 바꿔 주세요.";
+  return m;
+}
 function netErr(e){
   if(location.protocol==="file:")
     return "AI 서버에 연결하지 못했어요. 지금은 '파일 열기(file://)' 모드라서 막힌 것 같아요. "+
@@ -1139,7 +1151,7 @@ async function readHW(slot){
     if(slot===1){S.prompt1=t;$("readText").textContent=t||"(글씨를 찾지 못했어요)";
       $("promptFix").value=t;$("readResult").classList.remove("hidden");}
     else{$("prompt2").value=t;$("s4status").textContent="읽기 완료 ✓";}
-  }catch(e){ $(id).textContent="오류: "+e.message; }
+  }catch(e){ $(id).textContent="⚠ "+friendlyErr(e.message); }
   if(slot===1){b.disabled=false;b.innerHTML="🔎 AI에게 내 글씨 읽히기";}
 }
 function skipHW(){$("readResult").classList.remove("hidden");$("readText").textContent="(직접 입력하기)";$("promptFix").focus();}
@@ -1202,7 +1214,7 @@ async function generate(n){
     $(n===1?"plan2":"plan4").innerHTML=planPanel(plan,n);
     $(n===1?"s2next":"s4next").style.display="flex";
     $(id).textContent="완성! 가구를 끌어서 옮겨 볼 수 있어요.";
-  }catch(e){ $(id).textContent="오류: "+e.message; }
+  }catch(e){ $(id).textContent="⚠ "+friendlyErr(e.message); }
   btn.disabled=false; btn.innerHTML=n===1?"✨ 방 만들기":"✨ 다시 방 만들기";
 }
 function demoRoom(){
