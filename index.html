@@ -1,0 +1,1588 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>프롬프트로 마이 하우스 제작</title>
+<style>
+:root{
+  --cream:#f3eee4; --cream2:#e9e2d5; --paper:#ffffff; --ink:#14110f; --ink2:#3d3833;
+  --sub:#6f675e; --peri:#a3b0f5; --peri-d:#8093f0; --peri-l:#e6eaff;
+  --orange:#ff6b4a; --yellow:#ffd24a; --green:#7ecb9a; --pink:#f6a8c0;
+  --r:22px; --bd:2.5px solid var(--ink);
+}
+*{box-sizing:border-box}
+html,body{margin:0;padding:0}
+body{background:var(--cream);color:var(--ink);font-size:16px;line-height:1.62;min-height:100vh;
+  font-family:"Pretendard","Apple SD Gothic Neo","Malgun Gothic",system-ui,-apple-system,sans-serif;
+  -webkit-font-smoothing:antialiased;}
+.hard{box-shadow:6px 6px 0 0 var(--ink)}
+.hard-s{box-shadow:4px 4px 0 0 var(--ink)}
+
+/* ---------- 헤더 ---------- */
+header{position:sticky;top:0;z-index:60;background:var(--cream);border-bottom:3px solid var(--ink);
+  padding:12px 20px;display:flex;align-items:center;gap:13px;flex-wrap:wrap}
+header .logo{width:44px;height:44px;border-radius:14px;background:var(--peri);border:var(--bd);
+  display:grid;place-items:center;font-size:22px;flex:none;box-shadow:3px 3px 0 0 var(--ink)}
+header h1{font-size:21px;margin:0;font-weight:900;letter-spacing:-.7px;line-height:1.2}
+header h1 small{display:block;font-size:11.5px;font-weight:700;color:var(--sub);letter-spacing:0;margin-top:1px}
+header .spacer{flex:1}
+
+/* ---------- 버튼 ---------- */
+button{font-family:inherit;font-size:15px;cursor:pointer;border:var(--bd);border-radius:99px;
+  padding:10px 20px;font-weight:800;background:#fff;color:var(--ink);
+  transition:transform .1s, box-shadow .1s;box-shadow:3px 3px 0 0 var(--ink)}
+button:hover{transform:translate(-1px,-1px);box-shadow:4px 4px 0 0 var(--ink)}
+button:active{transform:translate(2px,2px);box-shadow:1px 1px 0 0 var(--ink)}
+.btn{background:var(--ink);color:#fff}
+.btn:disabled{background:#b9b2a8;color:#f3f0eb;cursor:not-allowed;transform:none;box-shadow:3px 3px 0 0 #8d867c}
+.btn-2{background:var(--peri);color:var(--ink)}
+.btn-3{background:#fff}
+.btn-sm{font-size:13.8px;padding:8px 15px;box-shadow:2.5px 2.5px 0 0 var(--ink)}
+.btn-sm:hover{box-shadow:3.5px 3.5px 0 0 var(--ink)}
+
+/* ---------- 레이아웃 ---------- */
+.wrap{max-width:1080px;margin:0 auto;padding:22px 18px 10px}
+.steps{display:flex;gap:8px;max-width:1080px;margin:18px auto 0;padding:0 18px;flex-wrap:wrap}
+.steps div{flex:1;min-width:112px;text-align:center;font-size:13.5px;font-weight:800;color:var(--sub);
+  background:#fff;border:var(--bd);border-radius:99px;padding:8px 4px;box-shadow:2.5px 2.5px 0 0 var(--ink)}
+.steps div.on{background:var(--peri);color:var(--ink)}
+.steps div.done{background:var(--yellow);color:var(--ink)}
+.card{background:var(--paper);border:var(--bd);border-radius:var(--r);padding:26px;margin-bottom:20px;box-shadow:6px 6px 0 0 var(--ink)}
+.card h2{margin:0 0 6px;font-size:27px;letter-spacing:-1px;font-weight:900;line-height:1.2}
+.card h3{margin:24px 0 10px;font-size:18.5px;font-weight:900;letter-spacing:-.4px}
+.lead{color:var(--ink2);margin:0 0 18px;font-size:15.4px}
+.hidden{display:none !important}
+label{font-weight:800;font-size:14.5px;display:block;margin-bottom:6px}
+input[type=text],input[type=password],textarea,select{width:100%;padding:12px 15px;border:var(--bd);
+  border-radius:14px;font-family:inherit;font-size:15px;background:#fff;color:var(--ink);font-weight:600}
+input:focus,textarea:focus,select:focus{outline:none;background:var(--peri-l)}
+textarea{resize:vertical;min-height:82px;line-height:1.65}
+.row{display:flex;gap:12px;flex-wrap:wrap}.row>*{flex:1;min-width:220px}
+.actions{display:flex;gap:11px;flex-wrap:wrap;margin-top:20px;align-items:center}
+.status{font-size:14px;color:var(--sub);font-weight:700}
+.small{font-size:13px;color:var(--sub)}
+.pill{display:inline-block;font-size:13.5px;background:var(--yellow);color:var(--ink);
+  padding:4px 13px;border-radius:99px;font-weight:800;border:2px solid var(--ink)}
+
+/* ---------- 안내 박스 ---------- */
+.tip,.warnbox,.okbox{border:var(--bd);border-radius:16px;padding:15px 17px;font-size:14.8px;margin:16px 0;box-shadow:4px 4px 0 0 var(--ink)}
+.tip{background:#fff6d9}.warnbox{background:#ffe4dd}.okbox{background:#dcf6e6}
+
+/* ---------- 업로드 ---------- */
+.drop{border:3px dashed var(--ink);border-radius:var(--r);padding:34px 18px;text-align:center;background:var(--cream2)}
+.drop:hover{background:var(--peri-l)}
+.drop.over{background:var(--peri)}
+.drop .ic{font-size:46px}
+.drop p{margin:10px 0 2px;font-weight:900;font-size:16.5px}
+.shot{max-width:100%;border-radius:16px;border:var(--bd);display:block;margin:14px auto;box-shadow:4px 4px 0 0 var(--ink)}
+.readback{background:var(--yellow);border:var(--bd);border-radius:16px;padding:17px;font-size:17.5px;line-height:1.8;font-weight:800;box-shadow:4px 4px 0 0 var(--ink)}
+.grade{display:flex;gap:9px;flex-wrap:wrap;margin-top:8px}
+.grade button{font-size:14px;padding:9px 17px}
+.grade button.sel{background:var(--peri)}
+.chk{display:flex;gap:12px;align-items:flex-start;padding:13px 15px;border:var(--bd);border-radius:15px;
+  margin-bottom:10px;background:#fff;cursor:pointer;box-shadow:3px 3px 0 0 var(--ink)}
+.chk:hover{background:var(--peri-l)}
+.chk input{margin-top:4px;width:20px;height:20px;flex:none;accent-color:var(--ink)}
+.chk .t b{display:block;font-size:15.5px}
+.chk .t small{color:var(--sub);font-size:13.4px}
+.q{margin-bottom:16px}
+
+/* ---------- 3D 무대 ---------- */
+#stage{border-radius:var(--r);overflow:hidden;border:var(--bd);background:var(--cream2);box-shadow:6px 6px 0 0 var(--ink)}
+#canvasHost{width:100%;height:min(60vh,540px);min-height:340px;display:block;position:relative;touch-action:none;cursor:grab;border-bottom:var(--bd)}
+#canvasHost.grabbing{cursor:grabbing}
+#canvasHost canvas{display:block;width:100%;height:100%}
+.overlay{position:absolute;pointer-events:none;inset:0}
+.hint{position:absolute;left:14px;top:14px;background:#fff;border:2.5px solid var(--ink);color:var(--ink);
+  font-size:12.5px;padding:6px 13px;border-radius:99px;font-weight:800;box-shadow:3px 3px 0 0 var(--ink)}
+.selbar{position:absolute;left:50%;bottom:14px;transform:translateX(-50%);display:flex;gap:6px;flex-wrap:wrap;
+  justify-content:center;background:#fff;border:2.5px solid var(--ink);border-radius:99px;padding:7px 11px;
+  box-shadow:4px 4px 0 0 var(--ink);max-width:94%}
+.selbar button{font-size:13px;padding:6px 12px;box-shadow:2px 2px 0 0 var(--ink)}
+.selbar .nm{font-weight:900;padding:6px 9px;font-size:13.5px}
+.selbar input[type=color]{width:36px;height:32px;padding:0;border:2.5px solid var(--ink);border-radius:9px;background:none;cursor:pointer}
+.toolrow{display:flex;gap:8px;flex-wrap:wrap;align-items:center;padding:12px;background:#fff;border-bottom:var(--bd)}
+.tbtn{font-size:13.4px;padding:7px 14px;box-shadow:2.5px 2.5px 0 0 var(--ink)}
+.tbtn.on{background:var(--peri)}
+.palbar{display:flex;gap:7px;flex-wrap:wrap;padding:11px 12px 4px;background:var(--cream2)}
+.pcat{font-size:13px;padding:6px 13px;box-shadow:2px 2px 0 0 var(--ink);background:#fff}
+.pcat.on{background:var(--yellow)}
+.palette{display:flex;gap:7px;flex-wrap:wrap;padding:9px 12px 13px;background:var(--cream2)}
+.pchip{font-size:13.3px;padding:7px 13px;box-shadow:2px 2px 0 0 var(--ink);background:#fff}
+.pchip:hover{background:var(--peri)}
+.pchip .e{font-size:16px;margin-right:4px}
+
+/* ---------- 설계도 패널 ---------- */
+.cpanel{margin-top:18px;border:var(--bd);border-radius:var(--r);overflow:hidden;background:#fff;box-shadow:5px 5px 0 0 var(--ink)}
+.ctabs{display:flex;background:var(--cream2);flex-wrap:wrap;border-bottom:var(--bd)}
+.ctab{flex:1;min-width:120px;background:transparent;border:none;border-radius:0;box-shadow:none;
+  color:var(--sub);font-size:14.5px;padding:13px 8px;border-right:2px solid var(--ink)}
+.ctab:hover{transform:none;box-shadow:none;background:#fff}
+.ctab:last-child{border-right:none}
+.ctab.on{background:#fff;color:var(--ink)}
+.cbody{padding:19px}
+h4.ch{margin:20px 0 10px;font-size:16.5px;font-weight:900}
+h4.ch:first-of-type{margin-top:2px}
+.ings{display:grid;grid-template-columns:repeat(auto-fill,minmax(215px,1fr));gap:11px}
+.ing{display:flex;gap:11px;align-items:flex-start;border:2.5px solid var(--ink);border-radius:15px;
+  padding:11px 13px;background:#fff;box-shadow:3px 3px 0 0 var(--ink)}
+.ing .ic{font-size:23px;line-height:1.15}
+.ing b{font-size:15px;display:block;font-weight:900}
+.ing b em{font-style:normal;font-size:13px;color:var(--sub)}
+.ing small{display:block;color:var(--sub);font-size:12.7px;line-height:1.45;margin:2px 0 5px}
+.ing code,code.k{background:var(--peri-l);border:1.5px solid var(--ink);color:var(--ink);font-size:11.6px;
+  padding:1px 7px;border-radius:6px;font-family:ui-monospace,Consolas,monospace;font-weight:700}
+.sw{display:inline-flex;align-items:center;gap:6px;border:2px solid var(--ink);border-radius:99px;
+  padding:3px 11px 3px 4px;font-size:12px;font-family:ui-monospace,Consolas,monospace;margin:0 6px 6px 0;font-weight:700}
+.sw i{width:19px;height:19px;border-radius:50%;display:block;border:1.5px solid var(--ink)}
+.codebox{border:2.5px solid var(--ink);border-radius:14px;background:var(--cream);max-height:420px;overflow:auto;padding:9px 0;margin-top:10px}
+.ln{display:flex;font-family:ui-monospace,Consolas,"D2Coding",monospace;font-size:13px;line-height:1.78}
+.ln .no{flex:none;width:44px;text-align:right;padding-right:12px;color:#a79f94;user-select:none}
+.ln .src{white-space:pre-wrap;word-break:break-word;padding-right:12px}
+.codeedit{width:100%;min-height:300px;font-family:ui-monospace,Consolas,"D2Coding",monospace;font-size:13px;
+  line-height:1.7;border:var(--bd);border-radius:14px;padding:13px;background:var(--cream);white-space:pre;font-weight:600}
+
+/* ---------- 명령 만들기 도우미 ---------- */
+.sfbox{border:var(--bd);border-radius:var(--r);background:var(--peri-l);padding:19px;box-shadow:5px 5px 0 0 var(--ink);margin:8px 0 4px}
+.sfstep{font-size:15px;font-weight:900;margin:16px 0 8px;display:flex;align-items:center;gap:8px}
+.sfstep:first-child{margin-top:0}
+.sfnum{width:26px;height:26px;border-radius:50%;background:var(--ink);color:#fff;display:grid;place-items:center;font-size:13.5px;flex:none}
+.sfrow{display:flex;gap:8px;align-items:center;background:#fff;border:2.5px solid var(--ink);border-radius:14px;
+  padding:9px 11px;margin-bottom:8px;flex-wrap:wrap;box-shadow:3px 3px 0 0 var(--ink)}
+.sfrow .nm{font-weight:900;min-width:96px;font-size:14.5px}
+.sfrow select{flex:1;min-width:130px;padding:8px 11px;border-radius:11px;border:2px solid var(--ink);font-size:14px}
+.sfrow .x{font-size:13px;padding:5px 11px;background:#ffe4dd;box-shadow:2px 2px 0 0 var(--ink)}
+.sfout{background:#fff;border:var(--bd);border-radius:16px;padding:15px 17px;font-size:16.5px;
+  line-height:1.85;font-weight:700;box-shadow:4px 4px 0 0 var(--ink);margin-top:8px}
+.sfout .ph{color:#b3aca2}
+
+/* ---------- 비교 ---------- */
+.compare{display:grid;grid-template-columns:repeat(auto-fit,minmax(270px,1fr));gap:15px}
+.col{border:var(--bd);border-radius:18px;padding:14px;background:#fff;box-shadow:4px 4px 0 0 var(--ink)}
+.col h4{margin:0 0 10px;font-size:14.5px;padding:5px 13px;border-radius:99px;display:inline-block;border:2px solid var(--ink);font-weight:900}
+.c1 h4{background:var(--cream2)}.c2 h4{background:var(--green)}.c3 h4{background:var(--yellow)}
+.col img{width:100%;border-radius:12px;border:2.5px solid var(--ink);display:block}
+
+/* ---------- 기타 ---------- */
+.spin{display:inline-block;width:15px;height:15px;border:3px solid rgba(255,255,255,.35);border-top-color:#fff;
+  border-radius:50%;animation:sp .8s linear infinite;vertical-align:-3px;margin-right:7px}
+@keyframes sp{to{transform:rotate(360deg)}}
+.modal{position:fixed;inset:0;background:rgba(20,17,15,.55);display:flex;align-items:center;justify-content:center;z-index:200;padding:16px}
+.modal .box{background:#fff;border:3px solid var(--ink);border-radius:var(--r);padding:26px;max-width:560px;width:100%;
+  max-height:88vh;overflow:auto;box-shadow:8px 8px 0 0 var(--ink)}
+footer{text-align:center;color:var(--sub);font-size:13px;padding:30px 18px 46px}
+
+/* ---------- 파일 열기 모드 배너 ---------- */
+.filebar{background:#fff6d9;border:var(--bd);border-radius:16px;padding:13px 16px;margin-bottom:18px;
+  font-size:14.4px;box-shadow:4px 4px 0 0 var(--ink);display:flex;gap:11px;align-items:center;flex-wrap:wrap}
+.filebar .t{flex:1;min-width:240px}
+.keyfrom{background:#dcf6e6;border:2px solid var(--ink);border-radius:12px;padding:9px 13px;
+  font-size:13.5px;font-weight:700;margin-bottom:12px}
+.keyfrom:empty{display:none}
+
+/* ---------- 업로드 버튼 / 카메라 / QR ---------- */
+.upbtns{display:flex;gap:10px;flex-wrap:wrap;justify-content:center;margin:14px 0 10px}
+#camVideo{width:100%;max-height:52vh;background:#14110f;border:var(--bd);border-radius:16px;display:block}
+#qrBox canvas,#qrBox img{border:var(--bd);border-radius:14px;padding:10px;background:#fff}
+#cardPrev img{width:100%;max-width:420px;border:var(--bd);border-radius:16px;display:block;margin:14px auto;box-shadow:5px 5px 0 0 var(--ink)}
+
+/* ---------- 모바일 ---------- */
+@media (max-width:720px){
+  body{font-size:15.5px}
+  header{padding:10px 13px;gap:9px}
+  header .logo{width:38px;height:38px;font-size:19px;border-radius:12px}
+  header h1{font-size:16.5px;flex:1 1 100%;order:2}
+  header h1 small{font-size:10.5px}
+  header .spacer{display:none}
+  header button{font-size:12.5px;padding:6px 11px}
+  .wrap{padding:15px 12px 8px}
+  .steps{gap:6px;padding:0 12px;flex-wrap:nowrap;overflow-x:auto;-webkit-overflow-scrolling:touch}
+  .steps::-webkit-scrollbar{display:none}
+  .steps div{min-width:96px;font-size:12.3px;flex:none;padding:7px 12px}
+  .card{padding:17px;border-radius:18px;box-shadow:4px 4px 0 0 var(--ink)}
+  .card h2{font-size:21px}
+  .card h3{font-size:16.5px;margin:18px 0 8px}
+  .lead{font-size:14.4px}
+  .upbtns button{flex:1 1 100%;font-size:15px;padding:13px 16px}
+  .upbtns .btn-sm{flex:1 1 auto;font-size:13.5px;padding:9px 14px}
+  #canvasHost{height:min(52vh,400px);min-height:280px}
+  .toolrow{padding:9px;gap:6px;overflow-x:auto;flex-wrap:nowrap}
+  .toolrow .tbtn{flex:none;font-size:12.5px;padding:6px 11px}
+  .toolrow .small{display:none}
+  .palbar,.palette{padding-left:9px;padding-right:9px}
+  .pcat,.pchip{font-size:12.5px;padding:6px 11px}
+  .selbar{bottom:8px;padding:6px 8px;gap:5px}
+  .selbar button{font-size:12px;padding:5px 9px}
+  .selbar .nm{font-size:12.5px;padding:5px 6px}
+  .ings{grid-template-columns:1fr}
+  .ctab{min-width:33%;font-size:13px;padding:11px 5px}
+  .cbody{padding:14px}
+  .sfrow{gap:6px}.sfrow .nm{min-width:100%}
+  .sfrow select{min-width:44%;font-size:13.5px;padding:7px 9px}
+  .sfout{font-size:15px;padding:13px}
+  .modal .box{padding:18px;border-radius:18px}
+  .compare{grid-template-columns:1fr}
+  .drop{padding:22px 12px}
+  .drop .ic{font-size:38px}
+}
+@media print{
+  header,.steps,.actions,.noprint,button,#stage{display:none !important}
+  body{background:#fff}.card{box-shadow:none;border:1px solid #ccc}
+  #reportArea{display:block !important}
+}
+</style>
+</head>
+<body>
+
+<header>
+  <div class="logo">🏠</div>
+  <h1>프롬프트로 마이 하우스 제작<small>초등 실과 [6실05-02] · 컴퓨터에게 명령하는 방법 체험하기</small></h1>
+  <span class="spacer"></span>
+  <button class="btn-sm btn-2" onclick="openQR()">📱 내 폰으로 열기</button>
+  <button class="btn-sm btn-3" onclick="openSettings()">⚙️ 교사 설정</button>
+  <button class="btn-sm btn-3" onclick="resetAll()">🔄 처음부터</button>
+</header>
+
+<div class="steps" id="stepbar"></div>
+<div class="wrap">
+
+<!-- 0 -->
+<section class="card" id="s0">
+  <h2>오늘의 미션 🏡</h2>
+  <p class="lead">종이에 <b>손글씨로 명령</b>을 쓰면 AI가 그대로 <b>3D 방</b>을 지어 줍니다.
+    그 방이 정말 내 말대로인지 <b>탐정처럼 따져 보고</b>, 내 손으로 가구를 옮겨 완성해요.</p>
+
+  <div class="tip"><b>💡 프롬프트란?</b> 컴퓨터에게 내리는 <b>명령</b>이에요.
+    사람은 대충 말해도 알아듣지만 컴퓨터는 <b>말한 그대로</b> 합니다. 명령이 자세할수록 내 방이 내 마음에 가까워져요.</div>
+
+  <h3>👤 우리 모둠</h3>
+  <div class="row">
+    <div><label>모둠 / 이름</label><input type="text" id="teamName" placeholder="예) 4모둠 김하늘"></div>
+    <div><label>내 방 이름</label><input type="text" id="houseName" placeholder="예) 하늘이의 게임방"></div>
+  </div>
+
+  <h3>🧾 이렇게 진행해요</h3>
+  <div class="ings">
+    <div class="ing"><span class="ic">✏️</span><div><b>1. 손글씨 명령</b><small>종이에 또박또박 쓰고 사진 찍기</small></div></div>
+    <div class="ing"><span class="ic">🏠</span><div><b>2. AI가 3D 방 짓기</b><small>명령을 읽고 가구를 배치해요</small></div></div>
+    <div class="ing"><span class="ic">🔎</span><div><b>3. 따져 보기</b><small>빠진 것·이상한 것 찾아내기</small></div></div>
+    <div class="ing"><span class="ic">🛠️</span><div><b>4. 명령 다시 만들기</b><small>도우미로 정확한 명령 조립하기</small></div></div>
+    <div class="ing"><span class="ic">🖐️</span><div><b>5. 내 손으로 완성</b><small>가구를 끌어 옮겨 마무리</small></div></div>
+  </div>
+
+  <div class="actions">
+    <button class="btn" onclick="goStep(1)">시작하기 →</button>
+    <button class="btn-2 btn-sm" onclick="demoRoom()">👀 먼저 3D 방 구경하기</button>
+    <span class="status" id="s0status"></span>
+  </div>
+</section>
+
+<!-- 1 -->
+<section class="card hidden" id="s1">
+  <h2>1단계 · 손글씨로 방을 주문하기 ✏️</h2>
+  <p class="lead">종이에 <b>어떤 방을 만들고 싶은지</b> 또박또박 쓰고 사진을 올리세요.<br>
+    예) 「창문 옆에 파란 침대를 놓고, 맞은편 벽에 TV와 게임기를 놔 줘. 가운데에는 노란 러그를 깔아 줘.」</p>
+
+  <div class="tip"><b>✏️ 예쁜 글씨가 힘이 됩니다</b> — AI는 흐릿하거나 삐뚤한 글씨를 <b>잘못 읽어요</b>.
+    또박또박 크게 써야 내 명령이 정확히 전달돼요. 잠시 뒤 AI가 얼마나 잘 읽었는지 확인해 봅시다!</div>
+
+  <div class="drop" id="drop">
+    <div class="ic">📸</div><p>내가 그린 스케치를 찍어서 올려요</p>
+    <div class="upbtns">
+      <button class="btn" onclick="document.getElementById('camIn1').click()">📷 지금 사진 찍기</button>
+      <button class="btn-2" onclick="document.getElementById('file').click()">🖼 앨범에서 고르기</button>
+      <button class="btn-3 btn-sm" onclick="openCam(1)">💻 웹캠으로 찍기</button>
+    </div>
+    <small class="small">파일을 끌어다 놓아도 됩니다</small>
+  </div>
+  <input type="file" id="camIn1" accept="image/*" capture="environment" class="hidden" onchange="onFile(event,1)">
+  <input type="file" id="file" accept="image/*" class="hidden" onchange="onFile(event,1)">
+  <img class="shot hidden" id="shot1" alt="올린 손글씨 사진">
+
+  <div class="actions">
+    <button class="btn" id="readBtn" onclick="readHW(1)" disabled>🔎 AI에게 내 글씨 읽히기</button>
+    <button class="btn-3 btn-sm" onclick="skipHW()">⌨️ 사진 없이 직접 입력</button>
+    <button class="btn-3 btn-sm" onclick="goStep(0)">← 뒤로</button>
+    <span class="status" id="s1status"></span>
+  </div>
+
+  <div id="readResult" class="hidden">
+    <h3>📖 AI가 읽은 내 명령</h3>
+    <div class="readback" id="readText"></div>
+    <div class="q" style="margin-top:18px">
+      <label>AI가 내 글씨를 정확히 읽었나요?</label>
+      <div class="grade" id="hwGrade">
+        <button onclick="setGrade('완벽하게 읽음')">😄 완벽해요</button>
+        <button onclick="setGrade('거의 읽음')">🙂 거의 맞아요</button>
+        <button onclick="setGrade('많이 틀림')">😅 많이 틀렸어요</button>
+      </div>
+    </div>
+    <div class="q"><label>틀린 곳이 있으면 고쳐 주세요 <span class="small">(이 내용이 AI에게 전달됩니다)</span></label>
+      <textarea id="promptFix"></textarea></div>
+    <div class="actions"><button class="btn" onclick="goStep(2)">이 명령으로 방 짓기 →</button></div>
+  </div>
+</section>
+
+<!-- 2 -->
+<section class="card hidden" id="s2">
+  <h2>2단계 · AI가 지은 3D 방 🏠</h2>
+  <p class="lead">내 명령: <span class="pill" id="promptEcho"></span></p>
+  <div class="actions" style="margin-top:0">
+    <button class="btn" id="genBtn" onclick="generate(1)">✨ 방 만들기</button>
+    <button class="btn-3 btn-sm" onclick="goStep(1)">← 뒤로</button>
+    <span class="status" id="s2status"></span>
+  </div>
+  <div id="host2" style="margin-top:18px"></div>
+  <div id="plan2"></div>
+  <div class="actions" id="s2next" style="display:none">
+    <button class="btn" onclick="goStep(3)">방을 따져 보러 가기 →</button>
+  </div>
+</section>
+
+<!-- 3 -->
+<section class="card hidden" id="s3">
+  <h2>3단계 · AI 탐정단 — 이 방을 따져 보자 🔎</h2>
+  <p class="lead">AI는 <b>똑똑하지만 완벽하지 않아요.</b> 시킨 걸 빠뜨리거나, 시키지 않은 걸 넣거나, 이상하게 놓기도 해요.</p>
+  <div id="host3"></div>
+  <div id="whyBox"></div>
+
+  <h3>① 다섯 가지 눈으로 검사하기</h3>
+  <div id="checkBox"></div>
+
+  <div class="actions" style="margin-top:8px">
+    <button class="btn-2 btn-sm" onclick="runAudit()">🧪 내가 다 찾았어요 — 컴퓨터로 확인하기</button>
+    <span class="status" id="auditStatus"></span>
+  </div>
+  <div id="auditOut"></div>
+
+  <h3>② 탐정 노트</h3>
+  <div class="q"><label>🔍 빠졌거나 이상한 점은 무엇인가요?</label>
+    <textarea id="q1" placeholder="예) 게임기를 놔 달라고 했는데 없어요 / 침대가 문을 막고 있어요"></textarea></div>
+  <div class="q"><label>🤔 AI는 왜 이렇게 놓았을까요? 그 이유에 동의하나요?</label>
+    <textarea id="q2" placeholder="예) 창문 옆이 밝아서 책상을 놓았다는데, 나는 햇빛이 눈부실 것 같아 반대다"></textarea></div>
+  <div class="q"><label>⚖️ 모두가 쓰기 편한 방인가요? <span class="small">(지나갈 길, 넘어질 물건 등)</span></label>
+    <textarea id="q3" placeholder="예) 가구 사이가 좁아 지나다니기 힘들 것 같다"></textarea></div>
+  <div class="q"><label>🎯 내 명령과 결과가 얼마나 같나요?</label>
+    <div class="grade" id="matchGrade">
+      <button onclick="setMatch('내 생각과 거의 같음')">🎯 거의 같아요</button>
+      <button onclick="setMatch('반쯤 같음')">😐 반쯤 같아요</button>
+      <button onclick="setMatch('많이 다름')">😮 많이 달라요</button>
+    </div></div>
+
+  <div class="warnbox"><b>꼭 기억해요</b> · AI가 만든 것은 <b>초안</b>일 뿐이에요.
+    확인하고 내가 고쳐야 <b>내 작품</b>이 됩니다. 쓸 때는 <b>“AI로 만들었다”고 밝히는 것</b>이 정직한 사용이에요.</div>
+
+  <div class="actions">
+    <button class="btn" onclick="goStep(4)">명령 만들기 도우미로 가기 →</button>
+    <button class="btn-3 btn-sm" onclick="goStep(2)">← 뒤로</button>
+  </div>
+</section>
+
+<!-- 4 -->
+<section class="card hidden" id="s4">
+  <h2>4단계 · 명령 만들기 도우미 🛠️</h2>
+  <p class="lead">좋은 명령에는 <b>세 가지</b>가 들어갑니다. 아래에서 골라 보면 문장이 저절로 만들어져요.</p>
+  <div class="ings" style="margin-bottom:6px">
+    <div class="ing"><span class="ic">📦</span><div><b>① 무엇을</b><small>가구 이름을 콕 집어서 (“가구” ✗ → “게임기, 침대” ○)</small></div></div>
+    <div class="ing"><span class="ic">📍</span><div><b>② 어디에</b><small>자리를 정확히 (“창문 옆”, “왼쪽 벽에 붙여서”)</small></div></div>
+    <div class="ing"><span class="ic">🎨</span><div><b>③ 어떻게</b><small>색·크기·하지 말 것 (“파란색으로”, “문 앞은 비워 줘”)</small></div></div>
+  </div>
+
+  <div class="sfbox">
+    <div class="sfstep"><span class="sfnum">1</span>방 크기를 고르세요</div>
+    <div class="grade" id="sfSize"></div>
+
+    <div class="sfstep"><span class="sfnum">2</span>넣고 싶은 가구를 누르세요 <span class="small">(여러 개 가능)</span></div>
+    <div class="palbar" id="sfCats" style="background:transparent;padding:0 0 8px"></div>
+    <div class="palette" id="sfChips" style="background:transparent;padding:0"></div>
+
+    <div class="sfstep"><span class="sfnum">3</span>가구마다 자리와 색을 정하세요</div>
+    <div id="sfRows"><p class="small">위에서 가구를 먼저 골라 주세요.</p></div>
+
+    <div class="sfstep"><span class="sfnum">4</span>지켜야 할 약속을 고르세요</div>
+    <div id="sfRules"></div>
+
+    <div class="sfstep"><span class="sfnum">5</span>이렇게 명령하면 됩니다</div>
+    <div class="sfout" id="sfOut"></div>
+    <div class="actions" style="margin-top:14px">
+      <button class="btn" onclick="useSentence()">⬇️ 이 문장으로 명령하기</button>
+      <button class="btn-3 btn-sm" onclick="copySentence()">📋 문장 복사</button>
+      <button class="btn-3 btn-sm" onclick="sfReset()">↺ 처음부터 고르기</button>
+      <span class="status" id="sfStatus"></span>
+    </div>
+    <p class="small" style="margin:12px 0 0">✏️ 이 문장을 <b>종이에 손글씨로 옮겨 쓴 뒤</b> 사진을 찍어 올려도 좋아요!</p>
+  </div>
+
+  <h3>✍️ 최종 명령</h3>
+  <div class="q">
+    <div class="upbtns" style="justify-content:flex-start;margin-bottom:12px">
+      <button class="btn-2 btn-sm" onclick="document.getElementById('camIn2').click()">📷 고친 스케치 찍기</button>
+      <button class="btn-3 btn-sm" onclick="document.getElementById('file2').click()">🖼 앨범에서 고르기</button>
+      <button class="btn-3 btn-sm" onclick="openCam(2)">💻 웹캠</button>
+      <span class="status" id="s4status"></span>
+    </div>
+    <input type="file" id="camIn2" accept="image/*" capture="environment" class="hidden" onchange="onFile(event,2)">
+    <input type="file" id="file2" accept="image/*" class="hidden" onchange="onFile(event,2)">
+    <img class="shot hidden" id="shot2" alt="고친 손글씨 사진">
+    <textarea id="prompt2" style="min-height:110px"></textarea>
+  </div>
+  <div class="actions" style="margin-top:6px">
+    <button class="btn" id="genBtn2" onclick="generate(2)">✨ 다시 방 만들기</button>
+    <button class="btn-3 btn-sm" onclick="goStep(3)">← 뒤로</button>
+    <span class="status" id="s2status2"></span>
+  </div>
+  <div id="host4" style="margin-top:18px"></div>
+  <div id="plan4"></div>
+  <div class="actions" id="s4next" style="display:none">
+    <button class="btn" onclick="goStep(5)">내 손으로 완성하러 가기 →</button>
+  </div>
+</section>
+
+<!-- 5 -->
+<section class="card hidden" id="s5">
+  <h2>5단계 · 내 손으로 완성하기 🖐️</h2>
+  <p class="lead">이제 <b>내가 직접</b> 가구를 끌어 옮기고, 돌리고, 색을 바꿔 방을 완성하세요.
+    다 됐으면 <b>[📷 완성 사진 찍기]</b>를 누르세요.</p>
+  <div id="host5"></div>
+  <div class="actions">
+    <button class="btn" onclick="finalShot()">📷 완성 사진 찍기</button>
+    <span class="status" id="s5status"></span>
+  </div>
+
+  <h3>📊 처음과 나중 비교</h3>
+  <div class="compare">
+    <div class="col c1"><h4>1차 — AI 첫 배치</h4><div id="cmp1"></div></div>
+    <div class="col c2"><h4>2차 — 명령 고친 뒤</h4><div id="cmp2"></div></div>
+    <div class="col c3"><h4>완성 — 내가 옮긴 방</h4><div id="cmp3"></div></div>
+  </div>
+
+  <h3>🧠 오늘의 배움</h3>
+  <div class="q"><label>💬 명령을 어떻게 바꿨더니 방이 좋아졌나요?</label>
+    <textarea id="r1" placeholder="예) '게임기'라고만 썼을 때는 안 나왔는데, 'TV 앞에 게임기를 놔 줘'라고 쓰니 생겼다."></textarea></div>
+  <div class="q"><label>🧑‍🔧 AI가 못 하고 사람이 해야 했던 일은 무엇인가요?</label>
+    <textarea id="r2" placeholder="예) 다니는 길이 좁은 걸 알아채고 소파를 옮긴 것"></textarea></div>
+  <div class="q"><label>✏️ 손글씨로 명령해 보니 어땠나요?</label>
+    <textarea id="r3" placeholder="예) '책상'을 흘려 썼더니 '책장'으로 읽었다. 또박또박 써야겠다."></textarea></div>
+
+  <div class="actions">
+    <button class="btn" onclick="saveCard()">🖼️ 기념 카드 저장 (이미지)</button>
+    <button class="btn-3 btn-sm" onclick="buildReport()">🖨️ 보고서 인쇄</button>
+    <button class="btn-3 btn-sm" onclick="goStep(4)">← 뒤로</button>
+    <span class="status" id="cardStatus"></span>
+  </div>
+  <p class="small">기념 카드는 오늘 활동을 한 장의 <b>PNG 그림</b>으로 만들어 줍니다. 폰으로 열었다면 사진첩에 저장돼요.</p>
+  <div id="cardPrev"></div>
+</section>
+
+<div id="reportArea" class="hidden"></div>
+</div>
+
+<!-- 3D 무대 -->
+<div id="stage" class="hidden">
+  <div id="canvasHost">
+    <div class="overlay"><div class="hint">빈 곳을 끌면 방이 돌아가요 · 가구를 끌면 옮겨져요</div></div>
+    <div class="selbar hidden" id="selbar"></div>
+  </div>
+  <div class="toolrow">
+    <button class="tbtn" onclick="camPreset('iso')">🧊 비스듬히</button>
+    <button class="tbtn" onclick="camPreset('top')">🗺️ 위에서</button>
+    <button class="tbtn" onclick="camPreset('front')">🚪 앞에서</button>
+    <button class="tbtn on" id="labelBtn" onclick="toggleLabels()">🏷️ 이름표</button>
+    <button class="tbtn" onclick="snapAll()">🧲 벽에 붙이기</button>
+    <button class="tbtn" onclick="shotDownload()">📷 사진 저장</button>
+    <span style="flex:1"></span>
+    <span class="small" id="cntInfo"></span>
+  </div>
+  <div class="palbar" id="palCats"></div>
+  <div class="palette" id="palette"></div>
+</div>
+
+<!-- 설정 -->
+<div class="modal hidden" id="settings">
+  <div class="box">
+    <h2 style="margin-top:0">⚙️ 교사 설정</h2>
+    <p class="lead">Google AI Studio에서 무료 API 키를 받아 붙여 넣으세요.
+      <a href="https://aistudio.google.com/apikey" target="_blank" rel="noopener">키 발급 페이지 열기</a></p>
+    <div class="keyfrom" id="keyFrom"></div>
+    <div class="q"><label>Gemini API 키</label>
+      <input type="password" id="apiKey" placeholder="AIza...">
+      <small class="small">이 브라우저에만 저장됩니다. 공용 PC라면 수업 후 [키 지우기]를 눌러 주세요.</small></div>
+    <div class="q"><label>사용 모델</label>
+      <select id="textModel">
+        <option value="gemini-3.5-flash">gemini-3.5-flash (권장)</option>
+        <option value="gemini-3.6-flash">gemini-3.6-flash</option>
+        <option value="gemini-2.5-flash">gemini-2.5-flash</option>
+      </select></div>
+    <div class="q"><label><input type="checkbox" id="safeMode" checked style="width:auto;margin-right:7px">어린이 안전 모드</label></div>
+    <div class="actions">
+      <button class="btn" onclick="saveSettings()">저장</button>
+      <button class="btn-3 btn-sm" onclick="clearKey()">키 지우기</button>
+      <button class="btn-3 btn-sm" onclick="closeSettings()">닫기</button>
+      <span class="status" id="setStatus"></span>
+    </div>
+  </div>
+</div>
+
+<!-- 웹캠 -->
+<div class="modal hidden" id="camModal">
+  <div class="box">
+    <h2 style="margin-top:0">📷 스케치 찍기</h2>
+    <p class="lead" id="camMsg">종이를 화면 가운데에 맞추고 [찍기]를 누르세요.</p>
+    <video id="camVideo" playsinline autoplay muted></video>
+    <div class="actions">
+      <button class="btn" onclick="camShoot()">📸 찍기</button>
+      <button class="btn-3 btn-sm" onclick="camFlip()">🔄 카메라 전환</button>
+      <button class="btn-3 btn-sm" onclick="camClose()">닫기</button>
+    </div>
+  </div>
+</div>
+
+<!-- QR -->
+<div class="modal hidden" id="qrModal">
+  <div class="box" style="text-align:center">
+    <h2 style="margin-top:0">📱 내 폰으로 열기</h2>
+    <p class="lead">같은 와이파이에 있는 폰으로 아래 QR을 비추면 <b>내 폰에서</b> 열 수 있어요.<br>
+      그 다음 <b>[📷 지금 사진 찍기]</b>로 스케치를 바로 올리면 됩니다.</p>
+    <div id="qrBox" style="display:flex;justify-content:center;padding:10px"></div>
+    <div class="q" style="margin-top:12px;text-align:left">
+      <label>주소 <span class="small">(검은 서버 창에 적힌 「같은 와이파이 폰」 주소를 넣으세요)</span></label>
+      <input type="text" id="qrUrl" oninput="drawQR()">
+    </div>
+    <div id="qrWarn"></div>
+    <div class="actions" style="justify-content:center">
+      <button class="btn-3 btn-sm" onclick="copyURL()">📋 주소 복사</button>
+      <button class="btn-3 btn-sm" onclick="closeQR()">닫기</button>
+      <span class="status" id="qrStatus"></span>
+    </div>
+  </div>
+</div>
+
+<footer>프롬프트로 마이 하우스 제작 · 초등 실과 [6실05-02] 수업 도구<br>
+API 키와 활동 기록은 이 컴퓨터(브라우저)에만 저장됩니다.</footer>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+<script>
+/* =========================================================
+   0. 상태 · 유틸
+========================================================= */
+const S={step:0,img1:null,img2:null,prompt1:"",hwGrade:"",match:"",
+  plan1:null,plan2:null,shot1:null,shot2:null,shot3:null,checks:{},built5:false};
+const STEP_NAMES=["미션","①손글씨","②AI가 짓기","③따져보기","④명령 도우미","⑤완성"];
+const $=id=>document.getElementById(id);
+const esc=s=>(s||"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+const clamp=(v,a,b)=>Math.max(a,Math.min(b,v));
+function josa(w,pair){const s=String(w||""),c=s.charCodeAt(s.length-1);
+  const b=c>=0xAC00&&c<=0xD7A3?((c-0xAC00)%28)!==0:false; return s+(b?pair[0]:pair[1]);}
+
+/* =========================================================
+   1. 가구 도감
+========================================================= */
+function shade(hex,amt){const c=new THREE.Color(hex),h={};c.getHSL(h);
+  c.setHSL(h.h,h.s,clamp(h.l+amt,.04,.97));return "#"+c.getHexString();}
+function M(color,r){return new THREE.MeshStandardMaterial({color:new THREE.Color(color),roughness:r===undefined?.82:r,metalness:.02});}
+function B(w,h,d,color,x,y,z,tint){const m=new THREE.Mesh(new THREE.BoxGeometry(w,h,d),M(color));
+  m.position.set(x,y,z);m.castShadow=true;m.receiveShadow=true;if(tint!==false)m.userData.tint=true;return m;}
+function CY(rt,rb,h,color,x,y,z,tint){const m=new THREE.Mesh(new THREE.CylinderGeometry(rt,rb,h,20),M(color));
+  m.position.set(x,y,z);m.castShadow=true;m.receiveShadow=true;if(tint)m.userData.tint=true;return m;}
+function SP(r,color,x,y,z,tint){const m=new THREE.Mesh(new THREE.SphereGeometry(r,18,14),M(color));
+  m.position.set(x,y,z);m.castShadow=true;if(tint)m.userData.tint=true;return m;}
+function TOR(r,t,color,x,y,z){const m=new THREE.Mesh(new THREE.TorusGeometry(r,t,10,24),M(color));
+  m.position.set(x,y,z);m.castShadow=true;return m;}
+function CONE(r,h,seg,color,x,y,z,tint){const m=new THREE.Mesh(new THREE.ConeGeometry(r,h,seg),M(color));
+  m.position.set(x,y,z);m.castShadow=true;if(tint)m.userData.tint=true;return m;}
+function legs(g,w,d,h,color){const t=.07;[[-1,-1],[1,-1],[-1,1],[1,1]].forEach(([a,b])=>
+  g.add(B(t,h,t,color,a*(w/2-t),h/2,b*(d/2-t),false)));}
+const G=()=>new THREE.Group();
+
+const CAT={
+/* ---- 침실 ---- */
+bed:{ko:"침대",e:"🛏️",w:1.5,d:2.0,h:.6,c:"#8fa8ff",build(o){const g=G(),{w,d,c}=o;
+  g.add(B(w,.22,d,shade(c,-.22),0,.11,0,false)); g.add(B(w-.06,.26,d-.06,c,0,.35,0));
+  g.add(B(w*.72,.14,.36,"#ffffff",0,.55,-d/2+.32,false)); g.add(B(w-.1,.09,d*.58,shade(c,.14),0,.52,d*.16));
+  g.add(B(w,.5,.1,shade(c,-.3),0,.35,-d/2,false)); return g;}},
+bunkbed:{ko:"이층침대",e:"🛌",w:1.2,d:2.0,h:1.9,c:"#a3b0f5",build(o){const g=G(),{w,d,c}=o;
+  [[.42],[1.42]].forEach(([y])=>{g.add(B(w,.18,d,shade(c,-.2),0,y,0,false));
+    g.add(B(w-.08,.2,d-.08,c,0,y+.18,0)); g.add(B(w*.7,.12,.32,"#fff",0,y+.32,-d/2+.28,false));});
+  [[-1,-1],[1,-1],[-1,1],[1,1]].forEach(([a,b])=>g.add(B(.1,1.9,.1,shade(c,-.3),a*(w/2-.05),.95,b*(d/2-.05),false)));
+  for(let i=0;i<4;i++) g.add(B(.5,.05,.05,shade(c,-.35),w/2+.06,.55+i*.24,d/2-.35,false)); return g;}},
+wardrobe:{ko:"옷장",e:"🚪",w:1.2,d:.6,h:2.0,c:"#c9a6e8",build(o){const g=G(),{w,d,h,c}=o;
+  g.add(B(w,h,d,c,0,h/2,0)); g.add(B(.03,h-.2,.02,shade(c,-.35),0,h/2,d/2+.01,false));
+  g.add(SP(.05,"#fff",-.09,h*.5,d/2+.03,false)); g.add(SP(.05,"#fff",.09,h*.5,d/2+.03,false)); return g;}},
+drawer:{ko:"서랍장",e:"🗄️",w:.9,d:.5,h:.85,c:"#e8c39e",build(o){const g=G(),{w,d,h,c}=o;
+  g.add(B(w,h,d,c,0,h/2,0));
+  for(let i=0;i<3;i++){g.add(B(w-.1,.02,.02,shade(c,-.3),0,.18+i*.26,d/2+.01,false));
+    g.add(B(.22,.04,.04,"#8d8d8d",0,.28+i*.26,d/2+.02,false));} return g;}},
+vanity:{ko:"화장대",e:"💄",w:1.0,d:.45,h:1.5,c:"#f6c9dd",build(o){const g=G(),{w,d,c}=o;
+  g.add(B(w,.06,d,c,0,.75,0)); legs(g,w,d,.72,shade(c,-.2));
+  g.add(B(w*.75,.62,.05,shade(c,-.12),0,1.15,-d/2+.04,false));
+  g.add(B(w*.62,.5,.02,"#cfe9f7",0,1.15,-d/2+.08,false));
+  for(let i=0;i<3;i++) g.add(B(.07,.13,.07,["#e8756e","#f2c14e","#8fd0f5"][i],-.25+i*.16,.84,.05,false)); return g;}},
+mirror:{ko:"거울",e:"🪞",w:.7,d:.14,h:1.7,c:"#dfe6ee",build(o){const g=G(),{w,d,h,c}=o;
+  g.add(B(w,h,d,c,0,h/2,0)); g.add(B(w-.12,h-.14,.03,"#cfe9f7",0,h/2,d/2+.01,false)); return g;}},
+beanbag:{ko:"빈백",e:"🫧",w:.9,d:.9,h:.6,c:"#f6a8c0",build(o){const g=G(),{c}=o;
+  const s=SP(.45,c,0,.3,0,true); s.scale.set(1,.72,1); g.add(s);
+  const t=SP(.3,shade(c,.1),0,.5,-.1,true); t.scale.set(1,.5,1); g.add(t); return g;}},
+/* ---- 거실 ---- */
+sofa:{ko:"소파",e:"🛋️",w:1.9,d:.85,h:.8,c:"#f7c56b",build(o){const g=G(),{w,d,c}=o;
+  g.add(B(w,.36,d,c,0,.2,0)); g.add(B(w-.4,.16,d-.2,shade(c,.12),0,.45,.05,false));
+  g.add(B(w,.5,.22,c,0,.55,-d/2+.11)); g.add(B(.2,.36,d,shade(c,-.1),-(w/2-.1),.5,0));
+  g.add(B(.2,.36,d,shade(c,-.1),w/2-.1,.5,0)); return g;}},
+tv:{ko:"TV",e:"📺",w:1.3,d:.35,h:.95,c:"#3e4657",build(o){const g=G(),{w,d,c}=o;
+  g.add(B(w*.8,.42,d,"#9c7a5c",0,.21,0,false)); g.add(B(.1,.18,.1,"#5b6472",0,.5,0,false));
+  g.add(B(w,.58,.07,c,0,.86,0)); g.add(B(w-.09,.5,.02,"#63b3f7",0,.86,.045,false)); return g;}},
+table:{ko:"탁자",e:"🪵",w:1.0,d:1.0,h:.5,c:"#dcb48d",build(o){const g=G(),{w,d,h,c}=o;
+  g.add(B(w,.07,d,c,0,h-.035,0)); g.add(CY(.09,.09,h-.1,shade(c,-.25),0,(h-.1)/2,0,false));
+  g.add(CY(.28,.3,.05,shade(c,-.3),0,.025,0,false)); return g;}},
+rug:{ko:"러그",e:"🟥",w:2.0,d:1.5,h:.04,c:"#f19c9c",flat:true,build(o){const g=G(),{w,d,c}=o;
+  const m=B(w,.03,d,c,0,.015,0); m.castShadow=false; g.add(m);
+  g.add(B(w-.22,.032,d-.22,shade(c,.14),0,.018,0)); return g;}},
+lamp:{ko:"전등",e:"💡",w:.4,d:.4,h:1.5,c:"#ffdf8a",build(o){const g=G(),{h,c}=o;
+  g.add(CY(.2,.22,.05,"#8b8f9c",0,.025,0,false)); g.add(CY(.03,.03,h-.3,"#a6abb8",0,(h-.3)/2,0,false));
+  const s=CY(.16,.26,.34,c,0,h-.17,0,true); s.material.emissive=new THREE.Color(c);
+  s.material.emissiveIntensity=.45; g.add(s); return g;}},
+plant:{ko:"화분",e:"🪴",w:.55,d:.55,h:1.1,c:"#5eb872",build(o){const g=G(),{c}=o;
+  g.add(CY(.19,.14,.34,"#cd7a52",0,.17,0,false)); g.add(SP(.26,c,0,.66,0));
+  g.add(SP(.19,shade(c,.1),.2,.88,.08)); g.add(SP(.17,shade(c,-.08),-.19,.85,-.06)); return g;}},
+clock:{ko:"벽시계",e:"🕐",w:.5,d:.1,h:.5,y:1.75,wall:true,c:"#ffffff",build(o){const g=G(),{c}=o;
+  const f=CY(.25,.25,.07,shade(c,-.75),0,0,0,false); f.rotation.x=Math.PI/2; g.add(f);
+  const d=CY(.21,.21,.03,c,0,0,.04,true); d.rotation.x=Math.PI/2; g.add(d);
+  g.add(B(.03,.14,.02,"#333",0,.06,.07,false)); g.add(B(.1,.03,.02,"#333",.04,0,.07,false)); return g;}},
+picture:{ko:"액자",e:"🖼️",w:.85,d:.08,h:.65,y:1.6,wall:true,c:"#f6c445",build(o){const g=G(),{w,h,c}=o;
+  g.add(B(w,h,.07,shade(c,-.4),0,0,0,false)); g.add(B(w-.12,h-.12,.03,c,0,0,.03));
+  g.add(B(w-.3,h-.34,.02,shade(c,.2),-.06,-.04,.05,false)); return g;}},
+aquarium:{ko:"어항",e:"🐠",w:.9,d:.45,h:1.0,c:"#7fd4f0",build(o){const g=G(),{w,d,c}=o;
+  g.add(B(w,.45,d,"#8d6e63",0,.22,0,false));
+  const t=B(w-.06,.5,d-.06,c,0,.72,0); t.material.transparent=true; t.material.opacity=.5; g.add(t);
+  g.add(B(w-.12,.06,d-.12,"#e8d9a0",0,.5,0,false));
+  g.add(SP(.06,"#ff9f43",-.15,.72,0,false)); g.add(SP(.05,"#ff6b6b",.15,.82,.05,false));
+  g.add(CONE(.06,.28,8,"#4caf50",.25,.62,0,false)); return g;}},
+/* ---- 공부방 ---- */
+desk:{ko:"책상",e:"📝",w:1.2,d:.6,h:.75,c:"#e5b585",build(o){const g=G(),{w,d,h,c}=o;
+  g.add(B(w,.07,d,c,0,h-.035,0)); legs(g,w,d,h-.07,shade(c,-.22));
+  g.add(B(w*.55,.3,.05,shade(c,-.1),0,h-.2,-d/2+.05,false)); return g;}},
+chair:{ko:"의자",e:"🪑",w:.5,d:.5,h:.95,c:"#f49a9a",build(o){const g=G(),{w,d,c}=o;
+  g.add(B(w,.08,d,c,0,.45,0)); legs(g,w,d,.45,shade(c,-.25));
+  g.add(B(w,.48,.08,c,0,.72,-d/2+.04)); return g;}},
+computer:{ko:"컴퓨터",e:"💻",w:1.0,d:.55,h:1.15,c:"#5b6472",build(o){const g=G(),{w,d,c}=o;
+  g.add(B(w,.05,d,"#c9a882",0,.72,0,false)); legs(g,w,d,.7,"#a58963");
+  g.add(B(.7,.42,.05,c,0,1.0,-.1)); g.add(B(.63,.35,.02,"#63b3f7",0,1.0,-.07,false));
+  g.add(B(.12,.14,.12,c,0,.81,-.1,false)); g.add(B(.44,.03,.16,"#e9e9ef",0,.76,.13,false));
+  g.add(B(.2,.34,.4,shade(c,-.2),w/2-.14,.9,0,false)); return g;}},
+bookshelf:{ko:"책장",e:"📚",w:1.0,d:.35,h:1.8,c:"#c08a5e",build(o){const g=G(),{w,d,h,c}=o;
+  g.add(B(.06,h,d,c,-(w/2),h/2,0)); g.add(B(.06,h,d,c,w/2,h/2,0)); g.add(B(w,.05,d,c,0,h,0));
+  const bc=["#e8756e","#6ea8e8","#7ecb8f","#f2c14e","#b58fe0"];
+  for(let i=0;i<4;i++){const y=.35+i*.42; g.add(B(w,.05,d,c,0,y,0));
+    for(let k=0;k<5;k++) g.add(B(.09,.28,d*.7,bc[(i+k)%5],-w/2+.16+k*.13,y+.17,0,false));} return g;}},
+globe:{ko:"지구본",e:"🌏",w:.4,d:.4,h:.6,c:"#5b8def",build(o){const g=G(),{c}=o;
+  g.add(CY(.14,.16,.04,"#8d6e63",0,.02,0,false)); g.add(CY(.02,.02,.22,"#a58963",0,.13,0,false));
+  g.add(SP(.19,c,0,.4,0)); g.add(SP(.07,"#7ecb8f",.1,.46,.12,false)); return g;}},
+/* ---- 주방 ---- */
+fridge:{ko:"냉장고",e:"🧊",w:.72,d:.7,h:1.8,c:"#e2e8f0",build(o){const g=G(),{w,d,h,c}=o;
+  g.add(B(w,h,d,c,0,h/2,0)); g.add(B(w-.02,.03,.02,shade(c,-.3),0,h*.62,d/2+.01,false));
+  g.add(B(.04,.5,.05,"#9aa3b2",w/2-.12,h*.78,d/2+.03,false));
+  g.add(B(.04,.5,.05,"#9aa3b2",w/2-.12,h*.35,d/2+.03,false)); return g;}},
+sink:{ko:"싱크대",e:"🚰",w:1.2,d:.6,h:.9,c:"#dfe6ee",build(o){const g=G(),{w,d,h,c}=o;
+  g.add(B(w,h,d,c,0,h/2,0)); g.add(B(w,.05,d,shade(c,-.12),0,h,0,false));
+  g.add(B(.45,.06,.38,"#b8c0cc",-.2,h-.01,0,false));
+  g.add(CY(.025,.025,.28,"#9aa3b2",-.2,h+.14,-.2,false)); g.add(B(.03,.03,.16,"#9aa3b2",-.2,h+.27,-.13,false));
+  g.add(B(w-.1,.02,.02,shade(c,-.3),0,h*.55,d/2+.01,false)); return g;}},
+stove:{ko:"가스레인지",e:"🍳",w:.8,d:.62,h:.9,c:"#4a4f57",build(o){const g=G(),{w,d,h,c}=o;
+  g.add(B(w,h,d,c,0,h/2,0)); g.add(B(w,.04,d,"#2b2f35",0,h,0,false));
+  [[-.19,-.14],[.19,-.14],[-.19,.16],[.19,.16]].forEach(([a,b])=>g.add(CY(.09,.09,.02,"#1c1f24",a,h+.02,b,false)));
+  g.add(B(w-.12,.36,.03,"#8fd0f5",0,h*.45,d/2+.01,false)); return g;}},
+microwave:{ko:"전자레인지",e:"🍲",w:.6,d:.42,h:.9,c:"#7c848f",build(o){const g=G(),{w,d,c}=o;
+  g.add(B(w-.06,.5,d-.06,"#c9a882",0,.25,0,false));
+  g.add(B(w,.34,d,c,0,.67,0)); g.add(B(w*.62,.24,.02,"#2b2f35",-.06,.67,d/2+.01,false));
+  g.add(B(.06,.06,.02,"#f2c14e",w/2-.09,.67,d/2+.02,false)); return g;}},
+diningtable:{ko:"식탁",e:"🍽️",w:1.6,d:.9,h:.76,c:"#c9a882",build(o){const g=G(),{w,d,h,c}=o;
+  g.add(B(w,.08,d,c,0,h-.04,0)); legs(g,w,d,h-.08,shade(c,-.25));
+  g.add(CY(.15,.15,.02,"#fff",-.4,h+.01,0,false)); g.add(CY(.15,.15,.02,"#fff",.4,h+.01,0,false)); return g;}},
+washer:{ko:"세탁기",e:"🧺",w:.65,d:.65,h:.9,c:"#eef2f7",build(o){const g=G(),{w,d,h,c}=o;
+  g.add(B(w,h,d,c,0,h/2,0));
+  const r=CY(.19,.19,.04,"#8fd0f5",0,h*.5,d/2,false); r.rotation.x=Math.PI/2; g.add(r);
+  g.add(B(w-.08,.1,.02,shade(c,-.2),0,h-.1,d/2+.01,false)); return g;}},
+/* ---- 욕실 ---- */
+toilet:{ko:"변기",e:"🚽",w:.45,d:.7,h:.8,c:"#ffffff",build(o){const g=G(),{c}=o;
+  g.add(B(.34,.28,.5,c,0,.14,.06)); g.add(CY(.21,.18,.14,c,0,.35,.06,true));
+  g.add(B(.42,.5,.18,c,0,.4,-.26)); g.add(B(.42,.05,.2,shade(c,-.1),0,.66,-.26,false)); return g;}},
+bathtub:{ko:"욕조",e:"🛁",w:1.6,d:.8,h:.6,c:"#ffffff",build(o){const g=G(),{w,d,h,c}=o;
+  g.add(B(w,h,d,c,0,h/2,0)); g.add(B(w-.16,.35,d-.16,"#a8dcf5",0,h-.14,0,false));
+  g.add(CY(.025,.025,.2,"#9aa3b2",-w/2+.12,h+.1,0,false)); return g;}},
+washbasin:{ko:"세면대",e:"🚿",w:.6,d:.45,h:.85,c:"#ffffff",build(o){const g=G(),{w,d,h,c}=o;
+  g.add(CY(.11,.14,h-.2,shade(c,-.08),0,(h-.2)/2,0,false)); g.add(B(w,.16,d,c,0,h-.08,0));
+  g.add(B(w-.12,.06,d-.12,"#dfeff7",0,h-.02,0,false));
+  g.add(CY(.02,.02,.16,"#9aa3b2",0,h+.08,-.14,false)); return g;}},
+/* ---- 놀이·취미 ---- */
+gameconsole:{ko:"게임기",e:"🎮",w:.8,d:.45,h:.75,c:"#2f3542",build(o){const g=G(),{w,d,c}=o;
+  g.add(B(w,.42,d,"#b48a63",0,.21,0,false));
+  g.add(B(.46,.13,.32,c,0,.49,0)); g.add(B(.4,.02,.26,"#63b3f7",0,.56,0,false));
+  g.add(B(.34,.05,.05,shade(c,.25),0,.58,.02,false));
+  [[-.24,"#e8756e"],[.24,"#6ea8e8"]].forEach(([x,col])=>{
+    g.add(B(.2,.07,.13,col,x,.47,.16,false)); g.add(SP(.035,"#fff",x+.05,.51,.16,false));
+    g.add(SP(.03,"#2b2f35",x-.05,.51,.16,false));});
+  g.add(B(.1,.03,.03,"#f2c14e",0,.44,.2,false)); return g;}},
+arcade:{ko:"오락기",e:"🕹️",w:.8,d:.75,h:1.85,c:"#e8534f",build(o){const g=G(),{w,d,h,c}=o;
+  g.add(B(w,h,d,c,0,h/2,0)); g.add(B(w-.06,.5,.04,"#1c1f24",0,h*.72,d/2,false));
+  g.add(B(w-.16,.4,.02,"#63b3f7",0,h*.72,d/2+.02,false));
+  g.add(B(w,.06,.4,shade(c,-.25),0,h*.5,d/2-.1,false));
+  g.add(CY(.03,.03,.16,"#2b2f35",-.16,h*.5+.11,d/2-.12,false)); g.add(SP(.055,"#e8534f",-.16,h*.5+.2,d/2-.12,false));
+  [[.06,"#f2c14e"],[.16,"#7ecb8f"],[.26,"#6ea8e8"]].forEach(([x,col])=>g.add(CY(.035,.035,.03,col,x,h*.5+.05,d/2-.12,false)));
+  g.add(B(w-.1,.3,.03,"#ffd24a",0,h-.16,d/2-.02,false)); return g;}},
+piano:{ko:"피아노",e:"🎹",w:1.4,d:.65,h:1.15,c:"#33383f",build(o){const g=G(),{w,d,h,c}=o;
+  g.add(B(w,h,d,c,0,h/2,0)); g.add(B(w-.1,.09,.28,"#f7f7f7",0,h*.62,d/2+.06,false));
+  for(let i=0;i<9;i++) g.add(B(.04,.06,.16,"#222",-w/2+.16+i*.14,h*.66,d/2+.02,false)); return g;}},
+guitar:{ko:"기타",e:"🎸",w:.45,d:.3,h:1.1,c:"#d98b3a",build(o){const g=G(),{c}=o;
+  const b=SP(.2,c,0,.24,0,true); b.scale.set(1,1.15,.42); g.add(b);
+  const b2=SP(.15,c,0,.5,0,true); b2.scale.set(1,1,.42); g.add(b2);
+  g.add(CY(.03,.03,.06,"#2b2f35",0,.3,.09,false));
+  g.add(B(.09,.55,.05,shade(c,-.4),0,.82,0,false)); g.add(B(.12,.16,.05,"#2b2f35",0,1.12,0,false)); return g;}},
+drum:{ko:"드럼",e:"🥁",w:1.1,d:.8,h:.9,c:"#e8534f",build(o){const g=G(),{c}=o;
+  const bd=CY(.35,.35,.42,c,0,.35,0,true); bd.rotation.x=Math.PI/2; g.add(bd);
+  g.add(CY(.17,.17,.22,shade(c,.15),-.3,.68,-.1,true)); g.add(CY(.15,.15,.2,shade(c,-.1),.28,.66,-.1,true));
+  const cym=CY(.24,.24,.015,"#f2c14e",.42,.86,.12,false); g.add(cym);
+  g.add(CY(.02,.02,.86,"#9aa3b2",.42,.43,.12,false)); return g;}},
+hoop:{ko:"농구골대",e:"🏀",w:1.2,d:.6,h:2.4,c:"#3e4657",build(o){const g=G(),{h,c}=o;
+  g.add(B(.5,.1,.5,shade(c,-.2),0,.05,-.18,false)); g.add(CY(.06,.06,h-.2,c,0,(h-.2)/2,-.18,false));
+  g.add(B(1.1,.7,.06,"#ffffff",0,h-.35,-.1,false)); g.add(B(.42,.3,.02,"#e8534f",0,h-.45,-.06,false));
+  const r=TOR(.21,.025,"#ff6b4a",0,h-.62,.12); r.rotation.x=Math.PI/2; g.add(r); return g;}},
+ball:{ko:"공",e:"⚽",w:.3,d:.3,h:.3,c:"#ff8f3a",build(o){const g=G(),{c}=o;
+  g.add(SP(.15,c,0,.15,0)); g.add(B(.3,.01,.01,"#2b2f35",0,.15,0,false));
+  g.add(B(.01,.01,.3,"#2b2f35",0,.15,0,false)); return g;}},
+tent:{ko:"텐트",e:"⛺",w:1.6,d:1.6,h:1.3,c:"#7ecb9a",build(o){const g=G(),{c}=o;
+  const t=CONE(1.05,1.3,4,c,0,.65,0,true); t.rotation.y=Math.PI/4; g.add(t);
+  g.add(B(.42,.62,.03,shade(c,-.35),0,.31,.72,false)); g.add(SP(.07,"#f2c14e",0,1.32,0,false)); return g;}},
+doghouse:{ko:"강아지집",e:"🐶",w:.9,d:.9,h:.85,c:"#c98b5e",build(o){const g=G(),{w,d,c}=o;
+  g.add(B(w,.55,d,c,0,.28,0)); const r=CONE(.72,.42,4,shade(c,-.3),0,.76,0,false); r.rotation.y=Math.PI/4; g.add(r);
+  g.add(B(.34,.4,.04,"#2b2f35",0,.2,d/2,false)); return g;}},
+robot:{ko:"로봇",e:"🤖",w:.6,d:.45,h:1.2,c:"#9aa3b2",build(o){const g=G(),{c}=o;
+  g.add(B(.42,.5,.28,c,0,.62,0)); g.add(B(.34,.3,.28,shade(c,.12),0,1.02,0));
+  g.add(SP(.05,"#63b3f7",-.09,1.05,.15,false)); g.add(SP(.05,"#63b3f7",.09,1.05,.15,false));
+  g.add(B(.2,.03,.03,"#e8534f",0,.95,.15,false));
+  g.add(CY(.05,.05,.4,shade(c,-.2),-.28,.62,0,false)); g.add(CY(.05,.05,.4,shade(c,-.2),.28,.62,0,false));
+  g.add(CY(.07,.07,.36,shade(c,-.3),-.12,.18,0,false)); g.add(CY(.07,.07,.36,shade(c,-.3),.12,.18,0,false));
+  g.add(CY(.015,.015,.14,"#f2c14e",0,1.24,0,false)); g.add(SP(.04,"#f2c14e",0,1.32,0,false)); return g;}},
+/* ---- 문·창문·꾸미기 ---- */
+door:{ko:"문",e:"🚪",w:.95,d:.14,h:2.0,c:"#c98b5e",wall:true,build(o){const g=G(),{w,d,h,c}=o;
+  g.add(B(w,h,d,c,0,h/2,0)); g.add(B(w-.14,h-.16,.02,shade(c,.12),0,h/2,d/2+.01,false));
+  g.add(SP(.055,"#f5d76e",w/2-.16,h*.48,d/2+.04,false)); return g;}},
+window:{ko:"창문",e:"🪟",w:1.3,d:.12,h:1.1,y:1.05,wall:true,c:"#bfe3ff",build(o){const g=G(),{w,d,h,c}=o;
+  g.add(B(w,h,d,"#f5f7fb",0,0,0,false));
+  const gl=B(w-.14,h-.14,.03,c,0,0,.02); gl.material.transparent=true; gl.material.opacity=.62; g.add(gl);
+  g.add(B(.05,h-.14,.05,"#f5f7fb",0,0,.03,false)); g.add(B(w-.14,.05,.05,"#f5f7fb",0,0,.03,false)); return g;}},
+curtain:{ko:"커튼",e:"🎀",w:1.7,d:.16,h:2.1,wall:true,c:"#f6a8c0",build(o){const g=G(),{w,h,c}=o;
+  g.add(B(w,.06,.06,"#a58963",0,h-.03,0,false));
+  [-1,1].forEach(s=>{for(let i=0;i<3;i++) g.add(B(.17,h-.12,.1,i%2?shade(c,-.08):c,s*(w/2-.12-i*.16),(h-.12)/2,0));});
+  return g;}},
+stairs:{ko:"계단",e:"🪜",w:1.0,d:1.5,h:1.2,c:"#c9a882",build(o){const g=G(),{w,d,c}=o;
+  for(let i=0;i<5;i++) g.add(B(w,.24,d/5,i%2?shade(c,-.06):c,0,.12+i*.24,d/2-d/10-i*(d/5)));
+  return g;}}
+};
+const KIND_LIST=Object.keys(CAT);
+const GROUPS=[
+  ["침실","🛏️",["bed","bunkbed","wardrobe","drawer","vanity","mirror","beanbag"]],
+  ["거실","🛋️",["sofa","tv","table","rug","lamp","plant","clock","picture","aquarium"]],
+  ["공부방","📚",["desk","chair","computer","bookshelf","globe"]],
+  ["주방","🍳",["fridge","sink","stove","microwave","diningtable","washer"]],
+  ["욕실","🛁",["toilet","bathtub","washbasin"]],
+  ["놀이·취미","🎮",["gameconsole","arcade","piano","guitar","drum","hoop","ball","tent","doghouse","robot"]],
+  ["문·꾸미기","🚪",["door","window","curtain","stairs"]]
+];
+
+/* =========================================================
+   2. Three.js 무대
+========================================================= */
+let renderer,scene,camera,roomGroup,furnRoot,raycaster,plane;
+let cam={theta:-.72,phi:.95,r:9.4,tx:0,ty:.9,tz:0};
+let sel=null,selBox=null,dragging=false,orbiting=false,dragOff=null;
+let labelsOn=true,ROOM={w:5,d:4},ready=false;
+
+function initThree(){
+  if(ready) return true;
+  if(typeof THREE==="undefined") return false;
+  dragOff=new THREE.Vector3();
+  const host=$("canvasHost");
+  renderer=new THREE.WebGLRenderer({antialias:true,preserveDrawingBuffer:true});
+  renderer.setPixelRatio(Math.min(window.devicePixelRatio||1,2));
+  renderer.shadowMap.enabled=true; renderer.shadowMap.type=THREE.PCFSoftShadowMap;
+  if(THREE.sRGBEncoding) renderer.outputEncoding=THREE.sRGBEncoding;
+  host.appendChild(renderer.domElement);
+  scene=new THREE.Scene(); scene.background=new THREE.Color("#e9e2d5");
+  scene.fog=new THREE.Fog("#e9e2d5",20,38);
+  camera=new THREE.PerspectiveCamera(45,1,.1,200);
+  scene.add(new THREE.HemisphereLight("#ffffff","#cfc6b6",.74));
+  const sun=new THREE.DirectionalLight("#fff4e2",.95);
+  sun.position.set(5.5,9.5,4.5); sun.castShadow=true; sun.shadow.mapSize.set(1024,1024);
+  sun.shadow.camera.left=-10; sun.shadow.camera.right=10; sun.shadow.camera.top=10;
+  sun.shadow.camera.bottom=-10; sun.shadow.bias=-.0016; scene.add(sun);
+  const fill=new THREE.DirectionalLight("#e6ecff",.26); fill.position.set(-6,5,-4); scene.add(fill);
+  roomGroup=new THREE.Group(); scene.add(roomGroup);
+  furnRoot=new THREE.Group(); scene.add(furnRoot);
+  raycaster=new THREE.Raycaster(); plane=new THREE.Plane(new THREE.Vector3(0,1,0),0);
+  buildRoom({w:5,d:4,wall:"#f4ece0",floor:"#d9ac78"});
+  bindPointer(); buildPalette();
+  window.addEventListener("resize",resize); resize();
+  (function loop(){requestAnimationFrame(loop); if(selBox)selBox.update(); renderer.render(scene,camera);})();
+  ready=true; return true;
+}
+function resize(){ if(!renderer)return; const h=$("canvasHost");
+  const w=h.clientWidth||820,ht=h.clientHeight||440;
+  renderer.setSize(w,ht,false); camera.aspect=w/ht; camera.updateProjectionMatrix(); updateCam(); }
+function updateCam(){
+  cam.phi=clamp(cam.phi,.12,1.46); cam.r=clamp(cam.r,3.2,24);
+  camera.position.set(cam.tx+cam.r*Math.sin(cam.phi)*Math.sin(cam.theta),
+    cam.ty+cam.r*Math.cos(cam.phi), cam.tz+cam.r*Math.sin(cam.phi)*Math.cos(cam.theta));
+  camera.lookAt(cam.tx,cam.ty,cam.tz);
+}
+function camPreset(k){const m=Math.max(ROOM.w,ROOM.d);
+  if(k==="top"){cam.theta=-.0001;cam.phi=.14;cam.r=m*1.35+2;}
+  if(k==="iso"){cam.theta=-.72;cam.phi=.95;cam.r=m*1.5+2.2;}
+  if(k==="front"){cam.theta=0;cam.phi=1.25;cam.r=m*1.5+2.4;}
+  updateCam();}
+function buildRoom(rm){
+  ROOM={w:clamp(rm.w||5,2.5,10),d:clamp(rm.d||4,2.5,10)};
+  while(roomGroup.children.length) roomGroup.remove(roomGroup.children[0]);
+  const W=ROOM.w,D=ROOM.d,wall=rm.wall||"#f4ece0",fl=rm.floor||"#d9ac78";
+  const f=new THREE.Mesh(new THREE.BoxGeometry(W,.16,D),M(fl,.95));
+  f.position.y=-.08; f.receiveShadow=true; roomGroup.add(f);
+  roomGroup.add(gridSafe(Math.max(W,D)));
+  const H=2.7,t=.15;
+  const wb=new THREE.Mesh(new THREE.BoxGeometry(W+t,H,t),M(wall,.95));
+  wb.position.set(0,H/2,-D/2-t/2); wb.receiveShadow=true; roomGroup.add(wb);
+  const wl=new THREE.Mesh(new THREE.BoxGeometry(t,H,D),M(shade(wall,-.05),.95));
+  wl.position.set(-W/2-t/2,H/2,0); wl.receiveShadow=true; roomGroup.add(wl);
+  roomGroup.add(B(W+t,.11,.07,shade(wall,-.35),0,.055,-D/2-.02,false));
+  roomGroup.add(B(.07,.11,D,shade(wall,-.35),-W/2-.02,.055,0,false));
+  camPreset("iso");
+}
+function gridSafe(size){
+  const g=new THREE.GridHelper(size,Math.round(size*2),0xb99a76,0xcbb193);
+  g.position.y=.007; if(g.material){g.material.opacity=.35;g.material.transparent=true;} return g;
+}
+function labelSprite(text){
+  const c=document.createElement("canvas"); c.width=320; c.height=88;
+  const g=c.getContext("2d");
+  g.fillStyle="#14110f"; roundRect(g,4,10,312,62,30); g.fill();
+  g.fillStyle="#ffffff"; roundRect(g,8,14,304,54,26); g.fill();
+  g.font='900 40px "Malgun Gothic","Apple SD Gothic Neo",sans-serif';
+  g.textAlign="center"; g.textBaseline="middle"; g.fillStyle="#14110f"; g.fillText(text,160,42);
+  const t=new THREE.CanvasTexture(c);
+  const s=new THREE.Sprite(new THREE.SpriteMaterial({map:t,transparent:true,depthTest:false}));
+  s.scale.set(1.1,.3,1); s.userData.isLabel=true; return s;
+}
+function roundRect(g,x,y,w,h,r){g.beginPath();g.moveTo(x+r,y);g.lineTo(x+w-r,y);
+  g.quadraticCurveTo(x+w,y,x+w,y+r);g.lineTo(x+w,y+h-r);g.quadraticCurveTo(x+w,y+h,x+w-r,y+h);
+  g.lineTo(x+r,y+h);g.quadraticCurveTo(x,y+h,x,y+h-r);g.lineTo(x,y+r);g.quadraticCurveTo(x,y,x+r,y);}
+function addItem(it){
+  const def=CAT[it.kind]; if(!def) return null;
+  const sc=clamp(it.scale||1,.4,2.2);
+  const g=def.build({w:def.w,d:def.d,h:def.h,c:it.color||def.c});
+  g.scale.setScalar(sc);
+  let z=it.z; if(def.wall && z===undefined) z=-ROOM.d/2+.1;
+  const hw=def.w*sc/2,hd=def.d*sc/2;
+  g.position.set(clamp(it.x||0,-ROOM.w/2+hw,ROOM.w/2-hw),(def.y||0)*sc,
+                 clamp(z||0,-ROOM.d/2+hd,ROOM.d/2-hd));
+  g.rotation.y=(it.rot||0)*Math.PI/180;
+  g.userData={kind:it.kind,ko:def.ko,color:it.color||def.c,why:it.why||"",scale:sc,
+    w:def.w,d:def.d,h:def.h,base:def.y||0};
+  const lb=labelSprite(def.ko); lb.position.set(0,def.h+.36,0); lb.visible=labelsOn; g.add(lb);
+  furnRoot.add(g); return g;
+}
+function clearFurn(){ while(furnRoot.children.length) furnRoot.remove(furnRoot.children[0]); select(null); }
+function buildFromPlan(plan){ if(!initThree())return;
+  buildRoom(plan.room||{}); clearFurn(); (plan.items||[]).forEach(addItem); updateCount(); }
+function updateCount(){ $("cntInfo").textContent=`가구 ${furnRoot?furnRoot.children.length:0}개 · 방 ${ROOM.w}m × ${ROOM.d}m`; }
+function select(g){
+  if(selBox){scene.remove(selBox);selBox=null;}
+  sel=g; if(!g){$("selbar").classList.add("hidden");return;}
+  selBox=new THREE.BoxHelper(g,0x14110f); scene.add(selBox);
+  const b=$("selbar"); b.classList.remove("hidden");
+  b.innerHTML=`<span class="nm">${CAT[g.userData.kind]?CAT[g.userData.kind].e:"📦"} ${esc(g.userData.ko)}</span>
+    <button onclick="rot(-45)">↺</button><button onclick="rot(45)">↻</button>
+    <button onclick="scl(1.12)">➕</button><button onclick="scl(.89)">➖</button>
+    <input type="color" value="${g.userData.color}" oninput="recolor(this.value)" title="색 바꾸기">
+    <button onclick="delSel()">🗑</button><button onclick="select(null)">✕</button>`;
+}
+function rot(d){ if(sel) sel.rotation.y+=d*Math.PI/180; }
+function scl(f){ if(!sel)return; const s=clamp(sel.scale.x*f,.4,2.4);
+  sel.scale.setScalar(s); sel.userData.scale=s; sel.position.y=sel.userData.base*s; clampPos(sel); }
+function recolor(hex){ if(!sel)return; sel.userData.color=hex;
+  sel.traverse(o=>{if(o.isMesh&&o.userData.tint)o.material.color.set(hex);}); }
+function delSel(){ if(!sel)return; furnRoot.remove(sel); select(null); updateCount(); }
+function clampPos(g){
+  const s=g.scale.x,q=Math.abs(Math.round(g.rotation.y/(Math.PI/2)))%2===1;
+  const hw=(q?g.userData.d:g.userData.w)*s/2,hd=(q?g.userData.w:g.userData.d)*s/2;
+  g.position.x=clamp(g.position.x,-ROOM.w/2+hw,ROOM.w/2-hw);
+  g.position.z=clamp(g.position.z,-ROOM.d/2+hd,ROOM.d/2-hd);
+}
+function toggleLabels(){ labelsOn=!labelsOn; $("labelBtn").classList.toggle("on",labelsOn);
+  furnRoot.children.forEach(g=>g.children.forEach(c=>{if(c.userData.isLabel)c.visible=labelsOn;})); }
+function snapAll(){ furnRoot.children.forEach(g=>{
+  const s=g.scale.x,hw=g.userData.w*s/2,hd=g.userData.d*s/2;
+  const dx=Math.min(Math.abs(g.position.x+ROOM.w/2-hw),Math.abs(g.position.x-ROOM.w/2+hw));
+  const dz=Math.min(Math.abs(g.position.z+ROOM.d/2-hd),Math.abs(g.position.z-ROOM.d/2+hd));
+  if(dx<dz) g.position.x=g.position.x<0?-ROOM.w/2+hw:ROOM.w/2-hw;
+  else       g.position.z=g.position.z<0?-ROOM.d/2+hd:ROOM.d/2-hd; }); }
+function bindPointer(){
+  const el=renderer.domElement,host=$("canvasHost"); let last={x:0,y:0};
+  const ndc=e=>{const r=el.getBoundingClientRect();
+    return new THREE.Vector2(((e.clientX-r.left)/r.width)*2-1,-((e.clientY-r.top)/r.height)*2+1);};
+  const hitFloor=e=>{raycaster.setFromCamera(ndc(e),camera);
+    const p=new THREE.Vector3(); raycaster.ray.intersectPlane(plane,p); return p;};
+  el.addEventListener("pointerdown",e=>{
+    el.setPointerCapture(e.pointerId); last={x:e.clientX,y:e.clientY};
+    raycaster.setFromCamera(ndc(e),camera);
+    const hits=raycaster.intersectObjects(furnRoot.children,true);
+    if(hits.length&&e.button===0){ let g=hits[0].object;
+      while(g.parent&&g.parent!==furnRoot) g=g.parent;
+      select(g); dragging=true; const p=hitFloor(e);
+      if(p) dragOff.set(g.position.x-p.x,0,g.position.z-p.z);
+    }else{ orbiting=true; if(e.button===0&&!hits.length) select(null); }
+    host.classList.add("grabbing");});
+  el.addEventListener("pointermove",e=>{
+    if(dragging&&sel){const p=hitFloor(e); if(p){sel.position.x=p.x+dragOff.x;sel.position.z=p.z+dragOff.z;clampPos(sel);} }
+    else if(orbiting){cam.theta-=(e.clientX-last.x)*.008; cam.phi-=(e.clientY-last.y)*.006;
+      last={x:e.clientX,y:e.clientY}; updateCam();}});
+  const end=()=>{dragging=false;orbiting=false;host.classList.remove("grabbing");};
+  el.addEventListener("pointerup",end); el.addEventListener("pointercancel",end);
+  el.addEventListener("wheel",e=>{e.preventDefault();cam.r+=e.deltaY*.0055;updateCam();},{passive:false});
+  el.addEventListener("contextmenu",e=>e.preventDefault());
+}
+let palCat=0;
+function buildPalette(){
+  $("palCats").innerHTML=GROUPS.map((g,i)=>
+    `<button class="pcat ${i===palCat?'on':''}" onclick="setPalCat(${i})">${g[1]} ${g[0]}</button>`).join("");
+  $("palette").innerHTML=GROUPS[palCat][2].map(k=>
+    `<button class="pchip" onclick="addAndSelect('${k}')"><span class="e">${CAT[k].e}</span>${CAT[k].ko}</button>`).join("");
+}
+function setPalCat(i){ palCat=i; buildPalette(); }
+function addAndSelect(kind){ if(!initThree())return;
+  const g=addItem({kind,x:(Math.random()-.5)*ROOM.w*.5,z:(Math.random()-.5)*ROOM.d*.5,rot:0});
+  select(g); updateCount(); }
+function snapshot(){ if(!renderer)return null; renderer.render(scene,camera);
+  try{return renderer.domElement.toDataURL("image/png");}catch(e){return null;} }
+function shotDownload(){const u=snapshot(); if(!u)return;
+  const a=document.createElement("a"); a.href=u; a.download="마이하우스.png"; a.click();}
+function mountStage(hostId){
+  if(!initThree()){ $(hostId).innerHTML="<div class='warnbox'>3D 기능을 불러오지 못했어요. 인터넷 연결을 확인한 뒤 새로고침해 주세요.</div>"; return; }
+  const st=$("stage"); st.classList.remove("hidden"); $(hostId).appendChild(st); setTimeout(resize,60);
+}
+
+/* =========================================================
+   3. Gemini
+========================================================= */
+const ENDPOINT="https://generativelanguage.googleapis.com/v1beta/interactions";
+const LEGACY=m=>`https://generativelanguage.googleapis.com/v1beta/models/${m}:generateContent`;
+const key=()=>(localStorage.getItem("mh_key")||"").trim();
+function netErr(e){
+  if(location.protocol==="file:")
+    return "AI 서버에 연결하지 못했어요. 지금은 '파일 열기(file://)' 모드라서 막힌 것 같아요. "+
+           "폴더의 [실행하기.bat]을 더블클릭해 http://localhost:8000 으로 열어 주세요.";
+  return "인터넷에 연결하지 못했어요. 연결 상태를 확인해 주세요. ("+e.message+")";
+}
+const model=()=>localStorage.getItem("mh_tm")||"gemini-3.5-flash";
+async function callGemini(parts,sys){
+  const input=parts.map(p=>p.type==="text"?{type:"text",text:p.text}:{type:"image",mime_type:p.mime,data:p.data});
+  const body={model:model(),input}; if(sys) body.system_instruction=sys;
+  let res,json;
+  try{ res=await fetch(ENDPOINT,{method:"POST",headers:{"Content-Type":"application/json","x-goog-api-key":key()},body:JSON.stringify(body)});
+       json=await res.json(); }catch(e){ throw new Error(netErr(e)); }
+  if(!res.ok){
+    const lb={contents:[{role:"user",parts:parts.map(p=>p.type==="text"?{text:p.text}:{inline_data:{mime_type:p.mime,data:p.data}})}]};
+    if(sys) lb.system_instruction={parts:[{text:sys}]};
+    const r2=await fetch(LEGACY(model()),{method:"POST",headers:{"Content-Type":"application/json","x-goog-api-key":key()},body:JSON.stringify(lb)});
+    const j2=await r2.json();
+    if(!r2.ok) throw new Error((json&&json.error&&json.error.message)||(j2&&j2.error&&j2.error.message)||("HTTP "+res.status));
+    return extract(j2);
+  }
+  return extract(json);
+}
+function extract(json){ const t=[];
+  (function walk(n,th){ if(!n||typeof n!=="object")return;
+    if(Array.isArray(n)){n.forEach(x=>walk(x,th));return;}
+    const isT=th||n.type==="thought"||n.thought===true;
+    if(typeof n.text==="string"&&n.text.trim()&&!isT) t.push(n.text);
+    for(const k in n){ if(/usage/i.test(k))continue; walk(n[k],isT);} })(json,false);
+  return {text:t.join("\n").trim()};
+}
+function needKey(id){ if(!key()){$(id).textContent="먼저 [⚙️ 교사 설정]에서 API 키를 넣어 주세요.";openSettings();return true;} return false; }
+
+/* =========================================================
+   4. 손글씨
+========================================================= */
+const OCR_SYS="너는 초등학생의 손글씨를 읽어 주는 도우미다. 이미지에 적힌 글씨를 그대로 정확히 옮겨 적어라. 맞춤법을 임의로 고치지 말고, 설명·인사·따옴표 없이 읽은 문장만 출력하라. 글씨가 없고 그림만 있으면 그림에 무엇이 어디에 그려져 있는지 한두 문장으로 설명하라.";
+function onFile(e,slot){
+  const file=e.target.files[0]; if(!file)return;
+  const fr=new FileReader();
+  fr.onload=()=>useImage(fr.result,slot);
+  fr.readAsDataURL(file);
+  e.target.value="";
+}
+function useImage(src,slot){
+  const im=new Image();
+  im.onload=()=>{
+    let w=im.width,h=im.height; const max=1400;
+    if(Math.max(w,h)>max){const r=max/Math.max(w,h);w=Math.round(w*r);h=Math.round(h*r);}
+    const cv=document.createElement("canvas"); cv.width=w; cv.height=h;
+    cv.getContext("2d").drawImage(im,0,0,w,h);
+    const url=cv.toDataURL("image/jpeg",.9),data=url.split(",")[1];
+    if(slot===1){S.img1={mime:"image/jpeg",data};$("shot1").src=url;$("shot1").classList.remove("hidden");
+      $("readBtn").disabled=false;$("s1status").textContent="사진 준비 완료! 아래 버튼을 누르세요 👇";}
+    else{S.img2={mime:"image/jpeg",data};$("shot2").src=url;$("shot2").classList.remove("hidden");readHW(2);}
+  };
+  im.src=src;
+}
+/* ---- 웹캠 (https 또는 localhost 필요) ---- */
+let camStream=null,camSlot=1,camFacing="environment";
+async function openCam(slot){
+  camSlot=slot; $("camModal").classList.remove("hidden"); $("camMsg").textContent="카메라를 켜는 중...";
+  await camStart();
+}
+async function camStart(){
+  camStop();
+  try{
+    camStream=await navigator.mediaDevices.getUserMedia({video:{facingMode:{ideal:camFacing},width:{ideal:1600}},audio:false});
+    const v=$("camVideo"); v.srcObject=camStream; if(v.play) v.play();
+    $("camMsg").textContent="종이를 화면 가운데에 맞추고 [찍기]를 누르세요.";
+  }catch(e){
+    $("camMsg").innerHTML="카메라를 열 수 없어요. 폰이라면 <b>[📷 지금 사진 찍기]</b>를 쓰세요."+
+      "<br><span class='small'>(웹캠은 https 주소이거나 카메라 권한이 있어야 켜집니다)</span>";
+  }
+}
+function camFlip(){ camFacing = camFacing==="environment"?"user":"environment"; camStart(); }
+function camShoot(){
+  const v=$("camVideo");
+  if(!v.videoWidth){ $("camMsg").textContent="아직 화면이 안 나왔어요. 잠시 뒤 다시 눌러 주세요."; return; }
+  const cv=document.createElement("canvas"); cv.width=v.videoWidth; cv.height=v.videoHeight;
+  cv.getContext("2d").drawImage(v,0,0);
+  useImage(cv.toDataURL("image/jpeg",.92),camSlot); camClose();
+}
+function camStop(){ if(camStream){ camStream.getTracks().forEach(t=>t.stop()); camStream=null; } }
+function camClose(){ camStop(); $("camModal").classList.add("hidden"); }
+
+/* ---- QR (폰으로 열기) ---- */
+function openQR(){
+  $("qrModal").classList.remove("hidden");
+  if(!$("qrUrl").value) $("qrUrl").value=location.href;
+  drawQR();
+}
+function closeQR(){ $("qrModal").classList.add("hidden"); }
+function drawQR(){
+  const url=$("qrUrl").value.trim(), box=$("qrBox"); box.innerHTML="";
+  const isFile=/^file:/i.test(url)||!url;
+  const isLocal=/^https?:\/\/(localhost|127\.0\.0\.1)/i.test(url);
+  $("qrWarn").innerHTML = isFile
+    ? `<div class="warnbox" style="text-align:left"><b>이 주소는 폰에서 열 수 없어요.</b><br>
+       깃허브에 올렸다면 위 칸에 <code class="k">https://dejavu3650725.github.io/myhouse/</code> 를 넣어 주세요.<br>
+       <span class="small">또는 폴더의 <b>실행하기.bat</b>을 켜고, 검은 창에 적힌 <code class="k">http://192.168.○.○:8000</code> 주소를 넣어도 됩니다.</span></div>`
+    : isLocal
+    ? `<div class="tip" style="text-align:left"><b>지금은 이 PC에서만 열리는 주소예요.</b><br>
+       폰에서도 열려면 <code class="k">localhost</code> 부분을 검은 서버 창에 적힌
+       <b>「같은 와이파이 폰」 주소</b>(예 <code class="k">192.168.0.12</code>)로 바꿔 주세요.
+       <span class="small">폰과 PC가 같은 와이파이에 있어야 합니다.</span></div>`
+    : "";
+  if(!url) return;
+  if(typeof QRCode==="undefined"){
+    box.innerHTML=`<p class="small">QR 그림을 불러오지 못했어요. 아래 주소를 직접 입력해 주세요.</p>`; return;
+  }
+  try{ new QRCode(box,{text:url,width:210,height:210,correctLevel:QRCode.CorrectLevel.M}); }
+  catch(e){ box.innerHTML=`<p class="small">QR을 만들지 못했어요.</p>`; }
+}
+function copyURL(){
+  const u=$("qrUrl").value.trim();
+  if(navigator.clipboard) navigator.clipboard.writeText(u);
+  $("qrStatus").textContent="주소를 복사했어요 ✓";
+}
+(function(){const d=$("drop");
+  ["dragenter","dragover"].forEach(t=>d.addEventListener(t,e=>{e.preventDefault();d.classList.add("over");}));
+  ["dragleave","drop"].forEach(t=>d.addEventListener(t,e=>{e.preventDefault();d.classList.remove("over");}));
+  d.addEventListener("drop",e=>{if(e.dataTransfer.files[0])onFile({target:{files:e.dataTransfer.files}},1);});})();
+async function readHW(slot){
+  const id=slot===1?"s1status":"s4status"; if(needKey(id))return;
+  const img=slot===1?S.img1:S.img2; if(!img){$(id).textContent="사진을 먼저 올려 주세요.";return;}
+  const b=$("readBtn");
+  if(slot===1){b.disabled=true;b.innerHTML='<span class="spin"></span>AI가 읽는 중...';}
+  $(id).textContent=slot===1?"":"AI가 읽는 중...";
+  try{ const r=await callGemini([{type:"image",mime:img.mime,data:img.data},{type:"text",text:"이 종이에 적힌 손글씨를 그대로 읽어 줘."}],OCR_SYS);
+    const t=(r.text||"").trim();
+    if(slot===1){S.prompt1=t;$("readText").textContent=t||"(글씨를 찾지 못했어요)";
+      $("promptFix").value=t;$("readResult").classList.remove("hidden");}
+    else{$("prompt2").value=t;$("s4status").textContent="읽기 완료 ✓";}
+  }catch(e){ $(id).textContent="오류: "+e.message; }
+  if(slot===1){b.disabled=false;b.innerHTML="🔎 AI에게 내 글씨 읽히기";}
+}
+function skipHW(){$("readResult").classList.remove("hidden");$("readText").textContent="(직접 입력하기)";$("promptFix").focus();}
+const P1=()=>($("promptFix").value||S.prompt1||"").trim();
+const P2=()=>($("prompt2").value||"").trim();
+
+/* =========================================================
+   5. 설계도 생성
+========================================================= */
+const PLAN_SYS=[
+"너는 초등학생의 방 꾸미기 명령을 읽고 3D 방 설계도를 만드는 도우미다.",
+"반드시 JSON 하나만 출력한다. 설명, 인사, 마크다운 코드펜스를 절대 붙이지 않는다.",
+'형식: {"room":{"w":5,"d":4,"wall":"#f4ece0","floor":"#d9ac78"},"items":[{"kind":"bed","x":-1.4,"z":-1.1,"rot":0,"scale":1,"color":"#8fa8ff","why":"창문 옆이 밝아서"}]}',
+"규칙:",
+"1) kind 는 반드시 다음 목록의 영어 낱말 중에서만 고른다. 괄호 안은 뜻이다: "+KIND_LIST.map(k=>k+"("+CAT[k].ko+")").join(", "),
+"2) 학생이 말한 물건이 목록에 없으면 가장 비슷한 것을 고른다. 예: 플레이스테이션·닌텐도·엑스박스→gameconsole, 오락실 기계→arcade, 노트북→computer, 커다란 나무→plant.",
+"3) x 는 가로 위치(-w/2 ~ w/2), z 는 세로 위치(-d/2 ~ d/2). 방 한가운데가 (0,0)이고 단위는 미터다.",
+"4) rot 은 0, 90, 180, 270 중 하나. 벽에 붙이는 가구는 벽을 등지도록 방향을 맞춘다.",
+"5) 가구끼리 겹치지 않게 하고 벽 밖으로 나가지 않게 한다. 사람이 지나갈 길을 0.7m 이상 남긴다.",
+"6) color 는 #rrggbb 여섯 자리. 학생이 색을 말하지 않았으면 어울리는 파스텔 색을 고른다.",
+"7) why 는 왜 그 자리에 놓았는지 초등학생이 알아들을 한국어 한 문장.",
+"8) 학생이 말한 물건은 빠짐없이 넣는다. 말하지 않은 가구는 3개까지만 더 넣을 수 있다.",
+"9) 가구는 4개 이상 16개 이하. 방 크기는 3~8 사이."
+].join("\n");
+function safeGuard(p){
+  if((localStorage.getItem("mh_safe")||"1")!=="1")return null;
+  const ban=["폭력","죽이","무기","야한","성인","술집","담배","도박","욕설","혐오","자살"];
+  const h=ban.find(w=>p.includes(w));
+  return h?`‘${h}’ 같은 낱말이 들어 있어요. 초등학교 수업에 알맞은 명령으로 바꿔 주세요.`:null;
+}
+function parsePlan(txt){
+  let t=(txt||"").replace(/```json/gi,"").replace(/```/g,"").trim();
+  const a=t.indexOf("{"),b=t.lastIndexOf("}");
+  if(a<0||b<0) throw new Error("설계도를 읽지 못했어요. 다시 시도해 보세요.");
+  const p=JSON.parse(t.slice(a,b+1)); const room=p.room||{};
+  room.w=clamp(+room.w||5,3,8); room.d=clamp(+room.d||4,3,8);
+  room.wall=/^#[0-9a-f]{6}$/i.test(room.wall||"")?room.wall:"#f4ece0";
+  room.floor=/^#[0-9a-f]{6}$/i.test(room.floor||"")?room.floor:"#d9ac78";
+  const items=(p.items||[]).filter(i=>i&&CAT[i.kind]).slice(0,18).map(i=>({
+    kind:i.kind,x:clamp(+i.x||0,-room.w/2,room.w/2),z:clamp(+i.z||0,-room.d/2,room.d/2),
+    rot:[0,90,180,270].indexOf(+i.rot)>=0?+i.rot:0,scale:clamp(+i.scale||1,.5,2),
+    color:/^#[0-9a-f]{6}$/i.test(i.color||"")?i.color:CAT[i.kind].c,
+    why:(i.why||"").toString().slice(0,80)}));
+  if(!items.length) throw new Error("가구를 하나도 만들지 못했어요. 명령을 조금 더 자세히 써 보세요.");
+  return {room,items};
+}
+async function generate(n){
+  const id=n===1?"s2status":"s2status2",btn=$(n===1?"genBtn":"genBtn2");
+  if(needKey(id))return;
+  const p=n===1?P1():P2();
+  if(!p){$(id).textContent="명령이 비어 있어요.";return;}
+  const g=safeGuard(p); if(g){$(id).textContent="⚠ "+g;return;}
+  btn.disabled=true; btn.innerHTML='<span class="spin"></span>AI가 방을 짓는 중...'; $(id).textContent="";
+  try{
+    const r=await callGemini([{type:"text",text:"학생의 명령:\n"+p+"\n\n이 명령대로 방 설계도 JSON을 만들어 줘."}],PLAN_SYS);
+    const plan=parsePlan(r.text);
+    if(n===1)S.plan1=plan; else {S.plan2=plan;S.built5=false;}
+    mountStage(n===1?"host2":"host4"); buildFromPlan(plan);
+    const shot=snapshot(); if(n===1)S.shot1=shot; else S.shot2=shot;
+    $(n===1?"plan2":"plan4").innerHTML=planPanel(plan,n);
+    $(n===1?"s2next":"s4next").style.display="flex";
+    $(id).textContent="완성! 가구를 끌어서 옮겨 볼 수 있어요.";
+  }catch(e){ $(id).textContent="오류: "+e.message; }
+  btn.disabled=false; btn.innerHTML=n===1?"✨ 방 만들기":"✨ 다시 방 만들기";
+}
+function demoRoom(){
+  mountStage("s0");
+  buildFromPlan({room:{w:5,d:4,wall:"#f4ece0",floor:"#d9ac78"},items:[
+    {kind:"bed",x:-1.4,z:-.9,rot:0,color:"#8fa8ff"},{kind:"desk",x:1.5,z:-1.4,rot:0,color:"#e5b585"},
+    {kind:"chair",x:1.5,z:-.7,rot:180,color:"#f49a9a"},{kind:"wardrobe",x:-1.9,z:1.3,rot:90,color:"#c9a6e8"},
+    {kind:"rug",x:.3,z:.8,rot:0,color:"#f19c9c"},{kind:"tv",x:1.7,z:1.2,rot:270,color:"#3e4657"},
+    {kind:"gameconsole",x:.9,z:1.4,rot:0,color:"#2f3542"},{kind:"arcade",x:2,z:-.2,rot:270,color:"#e8534f"},
+    {kind:"plant",x:-.2,z:-1.6,rot:0,color:"#5eb872"},{kind:"window",x:0,z:-2,rot:0,color:"#bfe3ff"}]});
+  $("s0status").textContent="가구를 끌어 보세요! 빈 곳을 끌면 방이 돌아가요.";
+}
+
+/* =========================================================
+   6. 설계도 패널
+========================================================= */
+const PLANBANK=[];
+function planPanel(plan,n){
+  const ci=PLANBANK.push(plan)-1;
+  return `<div class="cpanel" data-ci="${ci}" data-n="${n}">
+    <div class="ctabs">
+      <button class="ctab on" onclick="ptab(this,'easy')">🧩 설계도 뜯어보기</button>
+      <button class="ctab" onclick="ptab(this,'raw')">📜 설계도 코드</button>
+      <button class="ctab" onclick="ptab(this,'edit')">✏️ 직접 고쳐보기</button></div>
+    <div class="cbody" data-t="easy">${easyPlan(plan)}</div>
+    <div class="cbody hidden" data-t="raw">${rawPlan(plan)}</div>
+    <div class="cbody hidden" data-t="edit">${editPlan(plan)}</div></div>`;
+}
+function ptab(btn,t){const p=btn.closest(".cpanel");
+  p.querySelectorAll(".ctab").forEach(b=>b.classList.toggle("on",b===btn));
+  p.querySelectorAll(".cbody").forEach(b=>b.classList.toggle("hidden",b.dataset.t!==t));}
+function easyPlan(plan){
+  const cnt={}; plan.items.forEach(i=>cnt[i.kind]=(cnt[i.kind]||0)+1);
+  const cards=Object.keys(cnt).map(k=>{const it=plan.items.find(x=>x.kind===k);
+    return `<div class="ing"><span class="ic">${CAT[k].e}</span><div>
+      <b>${CAT[k].ko} <em>×${cnt[k]}</em></b>
+      <small>가로 ${CAT[k].w}m · 세로 ${CAT[k].d}m · 높이 ${CAT[k].h}m</small>
+      <span class="sw"><i style="background:${it.color}"></i>${it.color}</span></div></div>`;}).join("");
+  const whys=plan.items.filter(i=>i.why).slice(0,8).map(i=>`<li><b>${CAT[i.kind].ko}</b> — ${esc(i.why)}</li>`).join("");
+  return `<div class="tip" style="margin-top:0"><b>📐 설계도가 뭐예요?</b>
+    AI는 방을 바로 그리지 않아요. 먼저 <b>“무엇을 · 어디에 · 어떤 색으로”</b>를 적은 <b>설계도</b>를 만들고,
+    컴퓨터가 그 설계도를 읽어 3D로 조립해요. 설계도를 고치면 방도 바로 바뀐답니다.</div>
+  <h4 class="ch">① 이 방에 들어간 가구</h4><div class="ings">${cards}</div>
+  <h4 class="ch">② 방의 크기와 색</h4>
+  <div class="ings">
+    <div class="ing"><span class="ic">📏</span><div><b>방 크기</b><small>가로 ${plan.room.w}m × 세로 ${plan.room.d}m</small>
+      <code>"w":${plan.room.w}, "d":${plan.room.d}</code></div></div>
+    <div class="ing"><span class="ic">🎨</span><div><b>벽과 바닥 색</b><small>벽과 바닥에 칠한 색이에요</small>
+      <span class="sw"><i style="background:${plan.room.wall}"></i>${plan.room.wall}</span>
+      <span class="sw"><i style="background:${plan.room.floor}"></i>${plan.room.floor}</span></div></div>
+    <div class="ing"><span class="ic">🧭</span><div><b>위치 읽는 법</b><small>방 한가운데가 0. x는 좌우, z는 앞뒤예요</small>
+      <code>"x":-1.4, "z":1.1</code></div></div></div>
+  ${whys?`<h4 class="ch">③ AI가 밝힌 이유 <span class="small">— 정말 그럴까요?</span></h4><ul>${whys}</ul>`:""}`;
+}
+function rawPlan(plan){
+  const txt=JSON.stringify(plan,null,2);
+  const rows=txt.split("\n").map((l,i)=>`<div class="ln"><span class="no">${i+1}</span><span class="src">${esc(l)||" "}</span></div>`).join("");
+  return `<p class="small">이것이 AI가 만든 <b>설계도 코드</b>예요.
+    <code class="k">"kind"</code>는 가구 종류, <code class="k">"x"·"z"</code>는 놓을 자리, <code class="k">"color"</code>는 색깔이에요.
+    사람 말을 컴퓨터가 알아듣는 <b>숫자와 낱말</b>로 바꾼 것이지요.</p><div class="codebox">${rows}</div>`;
+}
+function editPlan(plan){
+  return `<p class="small">숫자나 낱말을 바꾸고 <b>[바꿔서 보기]</b>를 누르면 3D 방이 바로 달라져요.</p>
+    <div class="tip" style="margin-top:8px"><b>🔧 이런 걸 바꿔 보세요</b><br>
+      ① <code class="k">"color"</code> 색 번호 &nbsp;② <code class="k">"x"</code>·<code class="k">"z"</code> 숫자 &nbsp;
+      ③ <code class="k">"rot"</code>을 90으로 &nbsp;④ <code class="k">"kind"</code>를 다른 가구 이름으로</div>
+    <textarea class="codeedit" spellcheck="false">${esc(JSON.stringify(plan,null,2))}</textarea>
+    <div class="actions" style="margin-top:8px">
+      <button class="btn btn-sm" onclick="applyPlan(this)">▶ 바꿔서 보기</button>
+      <button class="btn-3 btn-sm" onclick="resetPlan(this)">↺ 처음으로</button>
+      <span class="status ed"></span></div>`;
+}
+function applyPlan(btn){const p=btn.closest(".cpanel"),st=p.querySelector(".ed");
+  try{ const plan=parsePlan(p.querySelector(".codeedit").value); const n=+p.dataset.n;
+    if(n===1)S.plan1=plan; else S.plan2=plan;
+    mountStage(n===1?"host2":"host4"); buildFromPlan(plan);
+    st.textContent="바뀐 설계도로 다시 지었어요 ✓";
+  }catch(e){ st.textContent="설계도에 오류가 있어요: "+e.message; }}
+function resetPlan(btn){const p=btn.closest(".cpanel"),plan=PLANBANK[+p.dataset.ci];
+  p.querySelector(".codeedit").value=JSON.stringify(plan,null,2); const n=+p.dataset.n;
+  if(n===1)S.plan1=plan; else S.plan2=plan;
+  mountStage(n===1?"host2":"host4"); buildFromPlan(plan);
+  p.querySelector(".ed").textContent="처음 설계도로 되돌렸어요.";}
+
+/* =========================================================
+   7. 3단계 검사
+========================================================= */
+const CHECKS=[
+  ["all","🎯 시킨 물건이 다 있나?","내가 말한 것을 하나씩 짚어 세어 보기"],
+  ["extra","➕ 시키지 않은 게 있나?","내가 말하지 않았는데 들어온 물건 찾기"],
+  ["size","📏 크기와 색이 맞나?","말한 색인지, 크기가 방에 비해 이상하지 않은지"],
+  ["place","🚪 자리가 알맞나?","문·창문을 막지 않는지, 지나다닐 길이 있는지"],
+  ["use","🤝 그대로 써도 될까?","AI가 만들었다고 밝혔는지, 내가 고칠 곳은 어디인지"]
+];
+function renderChecks(){ $("checkBox").innerHTML=CHECKS.map(([k,t,d])=>
+  `<label class="chk"><input type="checkbox" ${S.checks[k]?"checked":""} onchange="S.checks['${k}']=this.checked">
+   <span class="t"><b>${t}</b><small>${d}</small></span></label>`).join(""); }
+function renderWhy(){ const p=S.plan1; if(!p){$("whyBox").innerHTML="";return;}
+  const w=p.items.filter(i=>i.why).slice(0,6);
+  $("whyBox").innerHTML=w.length?`<div class="okbox"><b>🤖 AI가 말한 이유</b><br>`+
+    w.map(i=>`· <b>${CAT[i.kind].ko}</b> — ${esc(i.why)}`).join("<br>")+
+    `<br><span class="small">이유가 정말 맞는지, 나는 동의하는지 이야기해 봅시다.</span></div>`:""; }
+function runAudit(){
+  if(!furnRoot||!furnRoot.children.length){$("auditStatus").textContent="먼저 방을 만들어 주세요.";return;}
+  const its=furnRoot.children.map(g=>{const s=g.scale.x,q=Math.abs(Math.round(g.rotation.y/(Math.PI/2)))%2===1;
+    return {ko:g.userData.ko,x:g.position.x,z:g.position.z,
+      hw:(q?g.userData.d:g.userData.w)*s/2,hd:(q?g.userData.w:g.userData.d)*s/2,
+      flat:CAT[g.userData.kind]&&(CAT[g.userData.kind].flat||CAT[g.userData.kind].wall)};});
+  const found=[];
+  for(let i=0;i<its.length;i++)for(let j=i+1;j<its.length;j++){
+    const a=its[i],b=its[j]; if(a.flat||b.flat)continue;
+    const ox=Math.min(a.x+a.hw,b.x+b.hw)-Math.max(a.x-a.hw,b.x-b.hw);
+    const oz=Math.min(a.z+a.hd,b.z+b.hd)-Math.max(a.z-a.hd,b.z-b.hd);
+    if(ox>.06&&oz>.06) found.push(`<b>${a.ko}</b> ↔ <b>${b.ko}</b> : 서로 겹쳐 있어요`);}
+  its.forEach(a=>{if(a.x-a.hw<-ROOM.w/2-.02||a.x+a.hw>ROOM.w/2+.02||a.z-a.hd<-ROOM.d/2-.02||a.z+a.hd>ROOM.d/2+.02)
+    found.push(`<b>${a.ko}</b>${josa(a.ko,"이가").slice(a.ko.length)} 방 밖으로 나가 있어요`);});
+  const area=its.reduce((s,a)=>s+(a.flat?0:a.hw*2*a.hd*2),0),full=ROOM.w*ROOM.d;
+  if(area/full>.6) found.push(`가구가 바닥의 <b>${Math.round(area/full*100)}%</b>를 차지해요. 지나다니기 좁겠어요`);
+  $("auditOut").innerHTML=found.length
+    ?`<div class="warnbox"><b>컴퓨터가 찾은 것 ${found.length}가지</b><br>${found.map(f=>"· "+f).join("<br>")}
+      <br><span class="small">내가 찾은 것과 같았나요? 5단계에서 직접 옮겨 고쳐 봅시다.</span></div>`
+    :`<div class="okbox"><b>겹치거나 삐져나온 가구는 없어요 👍</b><br>
+      <span class="small">하지만 “내 마음에 드는가”는 컴퓨터가 알 수 없어요. 그건 내가 정하는 거예요.</span></div>`;
+  $("auditStatus").textContent="";
+}
+
+/* =========================================================
+   8. 4단계 · 명령 만들기 도우미
+========================================================= */
+const SIZES=[["작은 방","가로 3m 세로 3m",3,3],["보통 방","가로 5m 세로 4m",5,4],["큰 방","가로 6m 세로 5m",6,5]];
+const POSES=["창문 옆에","문 옆에","왼쪽 벽에 붙여서","오른쪽 벽에 붙여서","뒤쪽 벽에 붙여서","방 한가운데에","구석에","침대 옆에","TV 앞에"];
+const COLORS=[["","(색은 알아서)"],["하얀","#ffffff"],["까만","#2f3542"],["빨간","#e8534f"],["주황","#ff8f3a"],
+  ["노란","#ffd24a"],["연두","#a5d68a"],["초록","#4ea96b"],["파란","#5b8def"],["하늘","#8fd0f5"],
+  ["보라","#a97be0"],["분홍","#f6a8c0"],["갈색","#a9763f"],["회색","#9aa3b2"]];
+const RULES=[["문 앞은 막지 말아 줘",true],["가구 사이에 지나다닐 길을 넓게 남겨 줘",true],
+  ["가구끼리 겹치지 않게 해 줘",true],["창문 앞은 비워 줘",false]];
+let sfSize=1, sfCat=0, sfItems=[], sfRules=[0,1,2];
+
+function sfInit(){
+  $("sfSize").innerHTML=SIZES.map((s,i)=>
+    `<button class="${i===sfSize?'sel':''}" onclick="sfSetSize(${i})">${s[0]}<br><span class="small">${s[1]}</span></button>`).join("");
+  $("sfCats").innerHTML=GROUPS.map((g,i)=>
+    `<button class="pcat ${i===sfCat?'on':''}" onclick="sfSetCat(${i})">${g[1]} ${g[0]}</button>`).join("");
+  $("sfChips").innerHTML=GROUPS[sfCat][2].map(k=>
+    `<button class="pchip" onclick="sfAdd('${k}')"><span class="e">${CAT[k].e}</span>${CAT[k].ko}</button>`).join("");
+  $("sfRules").innerHTML=RULES.map((r,i)=>
+    `<label class="chk"><input type="checkbox" ${sfRules.indexOf(i)>=0?"checked":""} onchange="sfToggleRule(${i},this.checked)">
+     <span class="t"><b>${r[0]}</b></span></label>`).join("");
+  sfRenderRows();
+}
+function sfSetSize(i){sfSize=i;sfInit();}
+function sfSetCat(i){sfCat=i;sfInit();}
+function sfAdd(k){ if(sfItems.length>=10){$("sfStatus").textContent="가구는 10개까지 담을 수 있어요.";return;}
+  sfItems.push({kind:k,pos:0,col:0}); $("sfStatus").textContent=""; sfRenderRows(); sfPreview(); }
+function sfDel(i){ sfItems.splice(i,1); sfRenderRows(); sfPreview(); }
+function sfSet(i,f,v){ sfItems[i][f]=+v; sfPreview(); }
+function sfToggleRule(i,on){ const p=sfRules.indexOf(i);
+  if(on&&p<0)sfRules.push(i); if(!on&&p>=0)sfRules.splice(p,1); sfPreview(); }
+function sfReset(){ sfItems=[]; sfRules=[0,1,2]; sfSize=1; sfInit(); sfPreview(); }
+function sfRenderRows(){
+  const el=$("sfRows");
+  if(!sfItems.length){ el.innerHTML="<p class='small'>위에서 가구를 먼저 골라 주세요.</p>"; return; }
+  el.innerHTML=sfItems.map((it,i)=>`<div class="sfrow">
+    <span class="nm">${CAT[it.kind].e} ${CAT[it.kind].ko}</span>
+    <select onchange="sfSet(${i},'pos',this.value)">${POSES.map((p,j)=>`<option value="${j}" ${j===it.pos?"selected":""}>${p}</option>`).join("")}</select>
+    <select onchange="sfSet(${i},'col',this.value)">${COLORS.map((c,j)=>`<option value="${j}" ${j===it.col?"selected":""}>${c[0]?c[0]+" 색":"색은 알아서"}</option>`).join("")}</select>
+    <button class="x" onclick="sfDel(${i})">빼기</button></div>`).join("");
+}
+function sfSentence(){
+  const s=SIZES[sfSize];
+  if(!sfItems.length) return "";
+  const parts=sfItems.map(it=>{
+    const c=COLORS[it.col][0]; const ko=CAT[it.kind].ko;
+    return `${POSES[it.pos]} ${c?c+" ":""}${josa(ko,"을를")} 놓고`;});
+  let body=parts.join(", ");
+  body=body.replace(/ 놓고$/," 놓아 줘.");
+  const rules=sfRules.map(i=>RULES[i][0]);
+  const tail=rules.length?" "+rules.join(", ").replace(/줘,/g,"주고,")+".":"";
+  return `가로 ${s[2]}m 세로 ${s[3]}m 크기의 방을 만들어 줘. ${body}${tail}`;
+}
+function sfPreview(){
+  const t=sfSentence();
+  $("sfOut").innerHTML = t ? esc(t) : `<span class="ph">가구를 고르면 여기에 명령 문장이 만들어져요.</span>`;
+}
+function useSentence(){ const t=sfSentence();
+  if(!t){$("sfStatus").textContent="가구를 먼저 골라 주세요.";return;}
+  $("prompt2").value=t; $("sfStatus").textContent="아래 최종 명령칸에 넣었어요 ✓";
+  if($("prompt2").scrollIntoView) $("prompt2").scrollIntoView({behavior:"smooth",block:"center"}); }
+function copySentence(){ const t=sfSentence(); if(!t)return;
+  if(navigator.clipboard) navigator.clipboard.writeText(t);
+  $("sfStatus").textContent="문장을 복사했어요. 종이에 손글씨로 옮겨 써 보세요 ✓"; }
+
+/* =========================================================
+   9. 단계 이동 · 저장
+========================================================= */
+function renderSteps(){ $("stepbar").innerHTML=STEP_NAMES.map((n,i)=>
+  `<div class="${i===S.step?'on':(i<S.step?'done':'')}">${n}</div>`).join(""); }
+function goStep(n){
+  if(n===2) $("promptEcho").textContent=P1()||"(비어 있음)";
+  if(n===4){ if(!$("prompt2").value) $("prompt2").value=P1(); sfInit(); sfPreview(); }
+  S.step=n;
+  for(let i=0;i<=5;i++) $("s"+i).classList.toggle("hidden",i!==n);
+  if(n===2&&S.plan1){mountStage("host2");buildFromPlan(S.plan1);}
+  if(n===3){renderChecks();renderWhy(); if(S.plan1){mountStage("host3");buildFromPlan(S.plan1);}}
+  if(n===4&&S.plan2){mountStage("host4");buildFromPlan(S.plan2);}
+  if(n===5){mountStage("host5");
+    if(!S.built5&&(S.plan2||S.plan1)){buildFromPlan(S.plan2||S.plan1);S.built5=true;}
+    renderCompare();}
+  renderSteps(); window.scrollTo({top:0,behavior:"smooth"}); save();
+}
+function renderCompare(){const im=(u,a)=>u?`<img src="${u}" alt="${a}">`:"<p class='small'>아직 없어요.</p>";
+  $("cmp1").innerHTML=im(S.shot1,"1차");$("cmp2").innerHTML=im(S.shot2,"2차");$("cmp3").innerHTML=im(S.shot3,"완성");}
+function finalShot(){const u=snapshot(); if(!u){$("s5status").textContent="사진을 찍지 못했어요.";return;}
+  S.shot3=u; renderCompare(); $("s5status").textContent="완성 사진을 저장했어요 ✓";}
+function setGrade(g){S.hwGrade=g;mark("hwGrade",g);}
+function setMatch(g){S.match=g;mark("matchGrade",g);}
+function mark(box,val){const m={"완벽하게 읽음":0,"거의 읽음":1,"많이 틀림":2,
+  "내 생각과 거의 같음":0,"반쯤 같음":1,"많이 다름":2};
+  const el=$(box);[...el.children].forEach(b=>b.classList.remove("sel"));
+  if(m[val]!==undefined)el.children[m[val]].classList.add("sel"); save();}
+
+function openSettings(){$("settings").classList.remove("hidden"); showKeySource();}
+function closeSettings(){$("settings").classList.add("hidden");}
+function saveSettings(){localStorage.setItem("mh_key",$("apiKey").value.trim());
+  localStorage.setItem("mh_tm",$("textModel").value);
+  localStorage.setItem("mh_safe",$("safeMode").checked?"1":"0");
+  window.__keyFromFile=false; showKeySource(); $("setStatus").textContent="저장했습니다 ✓";
+  setTimeout(()=>{$("setStatus").textContent="";closeSettings();},700);}
+function clearKey(){localStorage.removeItem("mh_key");$("apiKey").value="";
+  window.__keyFromFile=false; showKeySource(); $("setStatus").textContent="키를 지웠습니다.";}
+function loadSettings(){$("apiKey").value=localStorage.getItem("mh_key")||"";
+  $("textModel").value=localStorage.getItem("mh_tm")||"gemini-3.5-flash";
+  $("safeMode").checked=(localStorage.getItem("mh_safe")||"1")==="1";}
+function save(){try{localStorage.setItem("mh_state",JSON.stringify({team:$("teamName").value,
+  house:$("houseName").value,hwGrade:S.hwGrade,match:S.match,checks:S.checks}));}catch(e){}}
+function answers(){return{team:$("teamName").value||"(이름 없음)",house:$("houseName").value||"내 방",
+  prompt1:P1(),prompt2:P2(),hwGrade:S.hwGrade||"-",match:S.match||"-",
+  checks:CHECKS.filter(c=>S.checks[c[0]]).map(c=>c[1]),
+  q1:$("q1").value,q2:$("q2").value,q3:$("q3").value,r1:$("r1").value,r2:$("r2").value,r3:$("r3").value,
+  furniture1:S.plan1?S.plan1.items.map(i=>CAT[i.kind].ko).join(", "):"-",
+  furniture2:S.plan2?S.plan2.items.map(i=>CAT[i.kind].ko).join(", "):"-",
+  date:new Date().toLocaleDateString("ko-KR")};}
+function buildReport(){
+  const a=answers();
+  const im=(u,t)=>u?`<div style="display:inline-block;width:32%;min-width:200px;vertical-align:top;margin:0 4px 8px 0">
+    <p class="small" style="margin:0 0 4px"><b>${t}</b></p>
+    <img src="${u}" style="width:100%;border-radius:10px;border:1px solid #ddd"></div>`:"";
+  $("reportArea").className="card";
+  $("reportArea").innerHTML=`
+    <h2>🏠 프롬프트로 마이 하우스 제작 — 활동 보고서</h2>
+    <p class="small">${esc(a.team)} · 「${esc(a.house)}」 · ${a.date} · 실과 [6실05-02]</p>
+    <h3>1. 손글씨로 내린 첫 명령</h3><p>${esc(a.prompt1)}</p>
+    <p class="small">AI가 내 글씨를 읽은 정도: <b>${esc(a.hwGrade)}</b></p>
+    <h3>2. AI가 만든 방</h3><p class="small">1차 가구: ${esc(a.furniture1)}</p>
+    ${im(S.shot1,"1차 — AI 첫 배치")}${im(S.shot2,"2차 — 명령 고친 뒤")}${im(S.shot3,"완성 — 내가 옮긴 방")}
+    <h3>3. 따져 보기</h3>
+    <p><b>확인한 항목:</b> ${a.checks.length?a.checks.map(esc).join(" / "):"-"}</p>
+    <p><b>명령과 결과의 일치도:</b> ${esc(a.match)}</p>
+    <p><b>빠졌거나 이상한 점:</b> ${esc(a.q1)}</p>
+    <p><b>AI의 이유에 대한 내 생각:</b> ${esc(a.q2)}</p>
+    <p><b>모두가 쓰기 편한가:</b> ${esc(a.q3)}</p>
+    <h3>4. 도우미로 만든 명령</h3><p>${esc(a.prompt2)}</p><p class="small">2차 가구: ${esc(a.furniture2)}</p>
+    <h3>5. 오늘의 배움</h3>
+    <p><b>명령을 어떻게 바꿨나:</b> ${esc(a.r1)}</p>
+    <p><b>사람이 해야 했던 일:</b> ${esc(a.r2)}</p>
+    <p><b>손글씨 소감:</b> ${esc(a.r3)}</p>
+    <p class="small" style="margin-top:18px">※ 이 방의 첫 배치는 생성형 인공지능(AI)이 만들었고, 학생이 검토하고 고쳐 완성했습니다.</p>`;
+  $("reportArea").classList.remove("hidden"); setTimeout(()=>window.print(),400);
+}
+/* ---------- 기념 카드(PNG) ---------- */
+function loadImg(src){ return new Promise(res=>{ if(!src) return res(null);
+  const i=new Image(); i.onload=()=>res(i); i.onerror=()=>res(null); i.src=src; }); }
+function rr(g,x,y,w,h,r){g.beginPath();g.moveTo(x+r,y);g.lineTo(x+w-r,y);g.quadraticCurveTo(x+w,y,x+w,y+r);
+  g.lineTo(x+w,y+h-r);g.quadraticCurveTo(x+w,y+h,x+w-r,y+h);g.lineTo(x+r,y+h);
+  g.quadraticCurveTo(x,y+h,x,y+h-r);g.lineTo(x,y+r);g.quadraticCurveTo(x,y,x+r,y);g.closePath();}
+function wrapText(g,text,x,y,maxW,lh,maxLines){
+  const words=String(text||"").replace(/\s+/g," ").trim();
+  if(!words) return y;
+  let line="",n=0;
+  for(const ch of words){
+    if(g.measureText(line+ch).width>maxW){
+      g.fillText(line,x,y); y+=lh; n++; line=ch;
+      if(n>=maxLines-1){ let rest=line;
+        for(const c2 of words.slice(words.indexOf(line)+line.length)){ if(g.measureText(rest+c2+"…").width>maxW) break; rest+=c2; }
+        g.fillText(rest+"…",x,y); return y+lh; }
+    } else line+=ch;
+  }
+  g.fillText(line,x,y); return y+lh;
+}
+function coverDraw(g,img,x,y,w,h,r){
+  g.save(); rr(g,x,y,w,h,r); g.clip();
+  const s=Math.max(w/img.width,h/img.height), iw=img.width*s, ih=img.height*s;
+  g.drawImage(img,x+(w-iw)/2,y+(h-ih)/2,iw,ih); g.restore();
+  g.lineWidth=5; g.strokeStyle="#14110f"; rr(g,x,y,w,h,r); g.stroke();
+}
+async function saveCard(){
+  const a=answers();
+  $("cardStatus").textContent="카드를 만드는 중...";
+  const [i1,i2,i3]=await Promise.all([loadImg(S.shot1),loadImg(S.shot2),loadImg(S.shot3)]);
+  const main=i3||i2||i1, sub=[i1,i2,i3].filter(x=>x&&x!==main).slice(0,2);
+  const W=1080,H=1640,PH=1560,cv=document.createElement("canvas"); cv.width=W; cv.height=H;
+  const g=cv.getContext("2d");
+  const F=(sz,wt)=>`${wt||800} ${sz}px "Malgun Gothic","Apple SD Gothic Neo","Pretendard",sans-serif`;
+
+  g.fillStyle="#f3eee4"; g.fillRect(0,0,W,H);
+  g.fillStyle="#14110f"; rr(g,52,52,988,PH,42); g.fill();
+  g.fillStyle="#ffffff"; rr(g,40,40,988,PH,42); g.fill();
+
+  g.save(); rr(g,40,40,988,PH,42); g.clip();
+  g.fillStyle="#a3b0f5"; g.fillRect(40,40,988,138);
+  g.restore();
+  g.strokeStyle="#14110f"; g.lineWidth=6;
+  g.beginPath(); g.moveTo(40,178); g.lineTo(1028,178); g.stroke();
+  rr(g,40,40,988,PH,42); g.stroke();
+
+  g.fillStyle="#14110f"; g.textAlign="center"; g.font=F(45,900);
+  g.fillText("🏠 프롬프트로 마이 하우스 제작",534,118);
+  g.font=F(27,700); g.fillStyle="#4a443d";
+  g.fillText(`${a.team} · 「${a.house}」 · ${a.date}`,534,228);
+
+  let y=266;
+  if(main){ coverDraw(g,main,84,y,900,430,26);
+    g.fillStyle="#14110f"; rr(g,104,y+382,236,44,22); g.fill();
+    g.fillStyle="#fff"; g.font=F(23,800); g.textAlign="center";
+    g.fillText(i3?"완성 — 내가 옮긴 방":"AI가 만든 방",222,y+412);
+    y+=468;
+  } else { g.fillStyle="#e9e2d5"; rr(g,84,y,900,200,26); g.fill();
+    g.fillStyle="#8a8279"; g.font=F(26,700); g.textAlign="center";
+    g.fillText("방 사진이 아직 없어요",534,y+108); y+=238; }
+
+  if(sub.length){
+    const labels=["1차 — AI 첫 배치","2차 — 명령 고친 뒤"];
+    sub.forEach((im,k)=>{ const x=84+k*468;
+      coverDraw(g,im,x,y,432,222,20);
+      g.fillStyle="#ffd24a"; rr(g,x+14,y+170,214,38,19); g.fill();
+      g.strokeStyle="#14110f"; g.lineWidth=3; rr(g,x+14,y+170,214,38,19); g.stroke();
+      g.fillStyle="#14110f"; g.font=F(20,800); g.textAlign="center"; g.fillText(labels[k],x+121,y+196);});
+    y+=262;
+  }
+
+  g.textAlign="left";
+  const block=(icon,title,text,color,lines)=>{
+    if(!text||!String(text).trim()||y>1420) return;
+    g.fillStyle=color; rr(g,84,y,900,5,3); g.fill();
+    y+=36; g.fillStyle="#14110f"; g.font=F(26,900); g.fillText(icon+" "+title,84,y);
+    y+=38; g.fillStyle="#3d3833"; g.font=F(24,600);
+    y=wrapText(g,text,84,y,890,34,lines||2)+14;
+  };
+  block("✏️","내가 내린 명령",a.prompt2||a.prompt1,"#a3b0f5",3);
+  block("🔎","내가 찾아낸 점",a.q1,"#ff6b4a",2);
+  block("🧠","오늘의 배움",a.r1,"#7ecb9a",2);
+
+  g.fillStyle="#8a8279"; g.font=F(20,600); g.textAlign="center";
+  g.fillText("처음 배치는 AI가, 완성은 내가 했습니다.",534,1518);
+  g.fillText("초등 실과 [6실05-02] · 컴퓨터에게 명령하는 방법 체험하기",534,1552);
+
+  const url=cv.toDataURL("image/png");
+  $("cardPrev").innerHTML=`<img src="${url}" alt="기념 카드">`;
+  const l=document.createElement("a");
+  l.href=url; l.download=`마이하우스_${a.team}_${a.date}.png`; l.click();
+  $("cardStatus").textContent="기념 카드를 저장했어요 ✓ (폰이면 그림을 꾹 눌러 저장하세요)";
+}
+function resetAll(){if(!confirm("모든 활동 내용을 지우고 처음부터 시작할까요? (API 키는 유지됩니다)"))return;
+  localStorage.removeItem("mh_state");location.reload();}
+
+/* ---------- 시작 ---------- */
+loadSettings();
+try{const st=JSON.parse(localStorage.getItem("mh_state")||"{}");
+  if(st.team)$("teamName").value=st.team; if(st.house)$("houseName").value=st.house;}catch(e){}
+renderSteps(); sfInit(); sfPreview();
+
+/* ── 로컬 자동 실행 ─────────────────────────────────────────────
+   같은 폴더에 config.local.js 가 있으면 API 키를 자동으로 불러옵니다.
+   한 번만 적어 두면 다시 입력할 필요가 없습니다. */
+function validKey(k){
+  k=(k||"").trim();
+  return k.length>=20 && !/여기에|붙여넣|YOUR_|xxxx/i.test(k);
+}
+function showKeySource(){
+  const el=$("keyFrom"); if(!el) return;
+  if(!key()){ el.textContent=""; return; }
+  el.textContent = window.__keyFromFile
+    ? "✓ config.local.js 에서 키를 자동으로 불러왔습니다. 다시 입력하지 않아도 됩니다."
+    : "✓ 이 브라우저에 키가 저장되어 있습니다. 다시 입력하지 않아도 됩니다.";
+}
+(function(){
+  const done=()=>{
+    showKeySource();
+    if(location.protocol==="file:"){
+      const d=document.createElement("div"); d.className="filebar";
+      d.innerHTML='<span style="font-size:22px">📂</span><span class="t"><b>파일 열기 모드로 실행 중입니다.</b><br>'+
+        'AI가 방을 만들 때 연결 오류가 나면, 폴더의 <b>실행하기.bat</b>을 더블클릭해 '+
+        '<b>http://localhost:8000</b> 으로 열어 주세요. (같은 와이파이의 폰에서도 접속됩니다)</span>'+
+        '<button class="btn-3 btn-sm" onclick="this.parentElement.remove()">알겠어요</button>';
+      document.querySelector(".wrap").prepend(d);
+    }
+    if(!key()) setTimeout(openSettings,500);
+  };
+  const s=document.createElement("script"); s.src="config.local.js";
+  s.onload=()=>{
+    if(validKey(window.MH_API_KEY)){
+      localStorage.setItem("mh_key",String(window.MH_API_KEY).trim());
+      if(window.MH_MODEL) localStorage.setItem("mh_tm",window.MH_MODEL);
+      window.__keyFromFile=true; loadSettings();
+    }
+    done();
+  };
+  s.onerror=done;
+  document.head.appendChild(s);
+})();
+</script>
+</body>
+</html>
